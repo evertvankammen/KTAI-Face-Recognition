@@ -1,4 +1,10 @@
-Max python versie is  3.11, ivm medipipe, deze installeert niet onder python 3.12
+## Face recognition
+### Assigment of Key Topics of Artificial Intelligence OU, Netherlands 2024
 
-pip install mediapipe
-pip install opencv-python
+Raymond Snijders   
+Evert van Kammen  
+
+Maximum Python version to use is 3.11, mediapipe won't install with version 3.12.
+
+    pip install mediapipe
+    pip install opencv-python
