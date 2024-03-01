@@ -93,9 +93,23 @@ image = mp.Image.create_from_file(IMAGE_FILE)
 # STEP 4: Detect faces in the input image.
 detection_result = detector.detect(image)
 
+for x in detection_result.detections:
+    print(x.bounding_box)
+    for y in x.keypoints:
+        print(y)
+    print(x.categories)
+
+
+
 # STEP 5: Process the detection result. In this case, visualize it.
 image_copy = np.copy(image.numpy_view())
 annotated_image = visualize(image_copy, detection_result)
 rgb_annotated_image = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
+
+
+
 cv2.imshow("rotated", rgb_annotated_image)
+
+
+
 cv2.waitKey(0)
