@@ -11,8 +11,8 @@ Maximum Python version to use is 3.11, mediapipe won't install with version 3.12
     
 Depending on using CUDA (see https://developer.nvidia.com/cuda-zone and https://pytorch.org/get-started/locally/)  
 
-    pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 or  
 
-    pip3 install torch torchvision torchaudio 
+    pip install torch torchvision torchaudio 
