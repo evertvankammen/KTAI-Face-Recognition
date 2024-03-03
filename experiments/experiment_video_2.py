@@ -1,10 +1,10 @@
-from typing import Tuple, Union
 import math
+from typing import Tuple, Union
+
 import cv2
-import numpy as np
 import mediapipe as mp
+import numpy as np
 from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
 
 MARGIN = 10  # pixels
 ROW_SIZE = 10  # pixels
@@ -74,38 +74,54 @@ def visualize(
     return annotated_image
 
 
-IMAGE_FILE = '..\\data\\pictures\\img_2.png'
+BaseOptions = mp.tasks.BaseOptions
+FaceDetector = mp.tasks.vision.FaceDetector
+FaceDetectorOptions = mp.tasks.vision.FaceDetectorOptions
+VisionRunningMode = mp.tasks.vision.RunningMode
+
+# Create a face detector instance with the video mode:
+options = FaceDetectorOptions(
+    base_options=BaseOptions(model_asset_path='../models/detector.tflite'),
+    running_mode=VisionRunningMode.VIDEO)
+
+VIDEO_FILE = '..\\data\\movies\\The Scariest Trip of My Life. How This Airline Rescued Us.mp4'
 
 
-img = cv2.imread(IMAGE_FILE)
-cv2.imshow("image", img)
+with FaceDetector.create_from_options(options) as detector:
+    cap = cv2.VideoCapture(VIDEO_FILE)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    frame_duration = int(1000/fps)
+    print(fps)
+    print(frame_duration)
+    # Check if camera opened successfully
+    if not cap.isOpened():
+        print("Error opening video stream or file")
 
-# STEP 1: Import the necessary modules.
+    frame_counter = 0
+    frame_duration_counter = 0
+    # Read until video is completed
+    while cap.isOpened():
+        # Capture frame-by-frame
+        ret, frame = cap.read()
+        if ret:
+            # Display the resulting frame
+            cv2.imshow('Frame', frame)
+            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
+            face_detector_result = detector.detect_for_video(mp_image, frame_duration_counter)
 
+            image_copy = np.copy(mp_image.numpy_view())
+            annotated_image = visualize(image_copy, face_detector_result)
+            cv2.imshow("Annotated", annotated_image)
 
-# left eye, right eye, nose tip, mouth, left eye tragion, and right eye tragion.
+            # cv2.waitKey(0)
 
+            # Press Q on keyboard to  exit
+            if cv2.waitKey(25) & 0xFF == ord('q'):
+                break
 
-# STEP 2: Create an FaceDetector object.
-base_options = python.BaseOptions(model_asset_path='../models/detector.tflite')
-options = vision.FaceDetectorOptions(base_options=base_options)
-detector = vision.FaceDetector.create_from_options(options)
+        # Break the loop
+        else:
+            break
 
-# STEP 3: Load the input image.
-image = mp.Image(image_format=mp.ImageFormat.SRGB, data=img)
-
-# STEP 4: Detect faces in the input image.
-detection_result = detector.detect(image)
-
-for x in detection_result.detections:
-    print(x.bounding_box)
-    for y in x.keypoints:
-        print(y)
-    print(x.categories)
-
-# STEP 5: Process the detection result. In this case, visualize it.
-image_copy = np.copy(image.numpy_view())
-annotated_image = visualize(image_copy, detection_result)
-cv2.imshow("rotated", annotated_image)
-
-cv2.waitKey(0)
+        frame_counter = frame_counter + 1
+        frame_duration_counter = frame_duration_counter + frame_duration
