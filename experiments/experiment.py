@@ -1,3 +1,4 @@
+import os
 from typing import Tuple, Union
 import math
 import cv2
@@ -74,8 +75,7 @@ def visualize(
     return annotated_image
 
 
-IMAGE_FILE = '..\\data\\pictures\\img_2.png'
-
+IMAGE_FILE = os.path.join("..", "data", "pictures", "img_2.png")
 
 img = cv2.imread(IMAGE_FILE)
 cv2.imshow("image", img)
