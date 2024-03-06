@@ -1,4 +1,5 @@
 import math
+import os
 from typing import Tuple, Union
 
 import cv2
@@ -84,13 +85,12 @@ options = FaceDetectorOptions(
     base_options=BaseOptions(model_asset_path='../models/detector.tflite'),
     running_mode=VisionRunningMode.VIDEO)
 
-VIDEO_FILE = '..\\data\\movies\\The Scariest Trip of My Life. How This Airline Rescued Us.mp4'
-
+VIDEO_FILE = os.path.join("..", "data", "pictures", "Friends.mp4")
 
 with FaceDetector.create_from_options(options) as detector:
     cap = cv2.VideoCapture(VIDEO_FILE)
     fps = cap.get(cv2.CAP_PROP_FPS)
-    frame_duration = int(1000/fps)
+    frame_duration = int(1000/25)
     print(fps)
     print(frame_duration)
     # Check if camera opened successfully
