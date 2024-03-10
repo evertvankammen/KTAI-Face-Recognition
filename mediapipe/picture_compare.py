@@ -1,3 +1,4 @@
+import math
 import os
 
 import cv2
@@ -32,11 +33,8 @@ def distance_normalized_keypoint(keypoint1: NormalizedKeypoint, keypoint2: Norma
 def euclidean_distance(a, b):
     distance_temp = 0.0
     for i in range(len(a)):
-        if i < 4:
-            distance_temp += 2 * distance_normalized_keypoint(a[i], b[i])
-        else:
-            distance_temp += distance_normalized_keypoint(a[i], b[i])
-        return distance_temp
+        distance_temp += distance_normalized_keypoint(a[i], b[i])
+        return math.sqrt(distance_temp)
 
 
 class SimpleFacerec:
