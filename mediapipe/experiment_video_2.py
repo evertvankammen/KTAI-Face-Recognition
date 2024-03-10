@@ -1,9 +1,12 @@
 import os
+from time import sleep
+
 import cv2
 import mediapipe as mp
 import numpy as np
 from mediapipe.tasks import python
 from common import visualize
+from picture_compare import SimpleFacerec
 
 BaseOptions = mp.tasks.BaseOptions
 FaceDetector = mp.tasks.vision.FaceDetector
@@ -16,6 +19,10 @@ options = FaceDetectorOptions(
     running_mode=VisionRunningMode.VIDEO)
 
 VIDEO_FILE = os.path.join("..", "data", "pictures", "Friends.mp4")
+
+sfc = SimpleFacerec()
+image_path = os.path.join("..", "data", "pictures")
+nr_pictures = sfc.load_encoded_images(image_path)
 
 with FaceDetector.create_from_options(options) as detector:
     cap = cv2.VideoCapture(VIDEO_FILE)
@@ -34,25 +41,26 @@ with FaceDetector.create_from_options(options) as detector:
         # Capture frame-by-frame
         ret, frame = cap.read()
         if ret:
-            # Display the resulting frame
-            # cv2.imshow('Frame', frame)
+            if cv2.waitKey(25) & 0xFF == ord('q'):
+                break
 
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            mp_image_temp = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            face_detector_result = detector.detect_for_video(mp_image_temp, frame_duration_counter)
+
+
+            for result in face_detector_result.detections:
+                if result.categories[0].score > 0.5:
+                    result.categories[0].category_name = sfc.face_lowest_distances(result.keypoints)
+                    for i in range(len(result.keypoints)):
+                        result.keypoints[i].label = str(i)
 
             mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
-
-            face_detector_result = detector.detect_for_video(mp_image, frame_duration_counter)
 
             image_copy = np.copy(mp_image.numpy_view())
             annotated_image = visualize(image_copy, face_detector_result)
             cv2.imshow("Annotated", annotated_image)
 
-            # sleep(1)
-            # cv2.waitKey(0)
-
-            # Press Q on keyboard to  exit
-            if cv2.waitKey(25) & 0xFF == ord('q'):
-                break
 
         # Break the loop
         else:

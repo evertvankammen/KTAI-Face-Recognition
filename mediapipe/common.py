@@ -55,6 +55,8 @@ def visualize(
                                                            width, height)
             color, thickness, radius = (0, 255, 0), 2, 2
             cv2.circle(annotated_image, keypoint_px, thickness, color, radius)
+            cv2.putText(annotated_image, keypoint.label, keypoint_px, cv2.FONT_HERSHEY_PLAIN,
+                        FONT_SIZE, TEXT_COLOR, FONT_THICKNESS)
 
         # Draw label and score
         category = detection.categories[0]
