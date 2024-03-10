@@ -1,18 +1,13 @@
-import math
-import os
 from typing import Tuple, Union
-
-import cv2
-import mediapipe as mp
+import math
 import numpy as np
-from mediapipe.tasks import python
+import cv2
 
 MARGIN = 10  # pixels
 ROW_SIZE = 10  # pixels
 FONT_SIZE = 1
 FONT_THICKNESS = 1
 TEXT_COLOR = (255, 0, 0)  # red
-
 
 def _normalized_to_pixel_coordinates(
         normalized_x: float, normalized_y: float, image_width: int,
@@ -60,6 +55,8 @@ def visualize(
                                                            width, height)
             color, thickness, radius = (0, 255, 0), 2, 2
             cv2.circle(annotated_image, keypoint_px, thickness, color, radius)
+            cv2.putText(annotated_image, keypoint.label, keypoint_px, cv2.FONT_HERSHEY_PLAIN,
+                        FONT_SIZE, TEXT_COLOR, FONT_THICKNESS)
 
         # Draw label and score
         category = detection.categories[0]
@@ -73,55 +70,3 @@ def visualize(
                     FONT_SIZE, TEXT_COLOR, FONT_THICKNESS)
 
     return annotated_image
-
-
-BaseOptions = mp.tasks.BaseOptions
-FaceDetector = mp.tasks.vision.FaceDetector
-FaceDetectorOptions = mp.tasks.vision.FaceDetectorOptions
-VisionRunningMode = mp.tasks.vision.RunningMode
-
-# Create a face detector instance with the video mode:
-options = FaceDetectorOptions(
-    base_options=BaseOptions(model_asset_path='../models/detector.tflite'),
-    running_mode=VisionRunningMode.VIDEO)
-
-VIDEO_FILE = os.path.join("..", "data", "pictures", "Friends.mp4")
-
-with FaceDetector.create_from_options(options) as detector:
-    cap = cv2.VideoCapture(VIDEO_FILE)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    frame_duration = int(1000/25)
-    print(fps)
-    print(frame_duration)
-    # Check if camera opened successfully
-    if not cap.isOpened():
-        print("Error opening video stream or file")
-
-    frame_counter = 0
-    frame_duration_counter = 0
-    # Read until video is completed
-    while cap.isOpened():
-        # Capture frame-by-frame
-        ret, frame = cap.read()
-        if ret:
-            # Display the resulting frame
-            cv2.imshow('Frame', frame)
-            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
-            face_detector_result = detector.detect_for_video(mp_image, frame_duration_counter)
-
-            image_copy = np.copy(mp_image.numpy_view())
-            annotated_image = visualize(image_copy, face_detector_result)
-            cv2.imshow("Annotated", annotated_image)
-
-            # cv2.waitKey(0)
-
-            # Press Q on keyboard to  exit
-            if cv2.waitKey(25) & 0xFF == ord('q'):
-                break
-
-        # Break the loop
-        else:
-            break
-
-        frame_counter = frame_counter + 1
-        frame_duration_counter = frame_duration_counter + frame_duration
