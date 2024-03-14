@@ -1,5 +1,4 @@
 import os
-from time import sleep
 
 import cv2
 import mediapipe as mp
@@ -7,6 +6,8 @@ import numpy as np
 from mediapipe.tasks import python
 from common import visualize
 from picture_compare import SimpleFacerec
+import userinteraction.userinterface as gui
+
 
 BaseOptions = mp.tasks.BaseOptions
 FaceDetector = mp.tasks.vision.FaceDetector
@@ -18,16 +19,16 @@ options = FaceDetectorOptions(
     base_options=BaseOptions(model_asset_path='../models/detector.tflite'),
     running_mode=VisionRunningMode.VIDEO)
 
-VIDEO_FILE = os.path.join("..", "data", "pictures", "Friends.mp4")
+VIDEO_FILE = os.path.join("..", "data", "movies", "The Ones With Chandler's Sarcasm _ Friends.mp4")
 
 sfc = SimpleFacerec()
 image_path = os.path.join("..", "data", "pictures")
-nr_pictures = sfc.load_encoded_images(image_path)
-
+#sfc.save_encodings_images(image_path)
+sfc.read_encoded_images()
 with FaceDetector.create_from_options(options) as detector:
     cap = cv2.VideoCapture(VIDEO_FILE)
     fps = cap.get(cv2.CAP_PROP_FPS)
-    frame_duration = int(1000/25)
+    frame_duration = 1000/fps
     print(fps)
     print(frame_duration)
     # Check if camera opened successfully
@@ -43,23 +44,29 @@ with FaceDetector.create_from_options(options) as detector:
         if ret:
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 break
-
-
             mp_image_temp = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            face_detector_result = detector.detect_for_video(mp_image_temp, frame_duration_counter)
-
+            face_detector_result = detector.detect_for_video(mp_image_temp, round(frame_duration_counter))
 
             for result in face_detector_result.detections:
-                if result.categories[0].score > 0.5:
+                if result.categories[0].score > 0.75:
                     result.categories[0].category_name = sfc.face_lowest_distances(result.keypoints)
-                    for i in range(len(result.keypoints)):
-                        result.keypoints[i].label = str(i)
 
             mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
 
             image_copy = np.copy(mp_image.numpy_view())
             annotated_image = visualize(image_copy, face_detector_result)
             cv2.imshow("Annotated", annotated_image)
+            if frame_counter % round(fps) == 0 and 1 == 2:
+                for result in face_detector_result.detections:
+                    if result.categories[0].score > 0.75:
+                        gui.start_gui(result.categories[0].category_name)
+                        if not gui.is_true:
+                            print(gui.name_entry)
+                            sfc.write_encoded_images(gui.name_entry, result.keypoints)
+                        else:
+                            print("Keuze was goed")
+
+
 
 
         # Break the loop
