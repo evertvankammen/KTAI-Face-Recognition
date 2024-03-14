@@ -21,7 +21,7 @@ frame_duration = int(1000 / 25)
 def method_name(frame):
     # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
     # rgb_small_frame = small_frame[:, :, ::-1]
-    face_locations = face_recognition.face_locations(frame)
+    face_locations = face_recognition.face_locations(frame, number_of_times_to_upsample=2 )
     face_encodings = face_recognition.face_encodings(frame, face_locations)
     face_names = []
     for face_encoding in face_encodings:
