@@ -7,7 +7,8 @@ MARGIN = 10  # pixels
 ROW_SIZE = 10  # pixels
 FONT_SIZE = 1
 FONT_THICKNESS = 1
-TEXT_COLOR = (255, 0, 0)  # red
+TEXT_COLOR = (255, 255, 255)  # white
+BOX_COLOR = (255, 0, 0)  # blue
 
 def _normalized_to_pixel_coordinates(
         normalized_x: float, normalized_y: float, image_width: int,
@@ -49,7 +50,7 @@ def visualize(
         bbox = detection.bounding_box
         start_point = bbox.origin_x, bbox.origin_y
         end_point = bbox.origin_x + bbox.width, bbox.origin_y + bbox.height
-        cv2.rectangle(annotated_image, start_point, end_point, TEXT_COLOR, 3)
+        cv2.rectangle(annotated_image, start_point, end_point, BOX_COLOR, 3)
 
         # Draw keypoints
         for keypoint in detection.keypoints:
