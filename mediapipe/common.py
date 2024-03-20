@@ -44,7 +44,7 @@ def visualize(
 
     for detection in detection_result.detections:
         # Draw bounding_box
-        if detection.categories[0].score <= 0.75:
+        if detection.categories[0].score <= 0.6:
             continue
         bbox = detection.bounding_box
         start_point = bbox.origin_x, bbox.origin_y

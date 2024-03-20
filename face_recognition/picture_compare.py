@@ -7,6 +7,7 @@ image_path = os.path.join("..", "data", "pictures")
 
 
 def get_image_encodings(path, name):
+
     person_name = os.path.splitext(name)[0]
     file = str(os.path.join(path, name))
     img = cv2.imread(file)

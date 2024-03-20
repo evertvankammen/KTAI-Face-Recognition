@@ -7,7 +7,7 @@ from mediapipe.tasks.python import vision
 from common import visualize
 
 
-IMAGE_FILE = os.path.join("..", "data", "pictures", "Joey Tribbiani.jpg")
+IMAGE_FILE = os.path.join( "image_1 Joey Tribbiani_834.jpg")
 
 img = cv2.imread(IMAGE_FILE)
 cv2.imshow("image", img)
