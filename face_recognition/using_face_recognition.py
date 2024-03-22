@@ -1,46 +1,24 @@
-import math
 import os
-import pickle
 from collections import Counter
 from pathlib import Path
 
 import cv2
-import mediapipe as mp
-import numpy as np
-from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
-from mediapipe.tasks.python.components.containers.keypoint import NormalizedKeypoint
+import face_recognition
 
-MODELS_DETECTOR_TFLITE = '../../models/detector.tflite'
 EMBEDDINGS_FILE = "embeddings.csv"
-
-base_options = python.BaseOptions(model_asset_path=MODELS_DETECTOR_TFLITE)
-options = vision.FaceDetectorOptions(base_options=base_options)
-detector = vision.FaceDetector.create_from_options(options)
 
 
 def get_image_encodings(path, name):
     file = str(os.path.join(path, name))
     img = cv2.imread(file)
-    image = mp.Image(image_format=mp.ImageFormat.SRGB, data=img)
-    detection_result = detector.detect(image)
-    if len(detection_result.detections) == 1:
-        return detection_result.detections[0].keypoints
+    rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    result = face_recognition.face_encodings(rgb_img)
+    if len(result) == 1:  # make sure training picture have 1 face
+        return result[0]
     return None
 
 
-def distance_normalized_keypoint(keypoint1: NormalizedKeypoint, keypoint2: NormalizedKeypoint):
-    return (keypoint1.x - keypoint2.x) ** 2 + (keypoint1.y - keypoint2.y) ** 2
-
-
-def euclidean_distance(a, b):
-    distance_temp = 0.0
-    for i in range(len(a)):
-        distance_temp += distance_normalized_keypoint(a[i], b[i])
-    return math.sqrt(distance_temp)
-
-
-class SimpleFacerec:
+class UsingFaceRecognition:
     known_encodings = []
 
     def __init__(self):
@@ -64,7 +42,7 @@ class SimpleFacerec:
         file_object = open(EMBEDDINGS_FILE, "a")
         file_object.write(f"{person_name};")
         for key_point in enc:
-            file_object.write(f"{key_point.x},{key_point.y};")
+            file_object.write(f"{key_point};")
         file_object.write("\n")
         file_object.close()
         self.known_encodings.append((person_name, enc))
@@ -75,7 +53,6 @@ class SimpleFacerec:
         except OSError or FileNotFoundError:
             print("No such file or directory")
             raise UserWarning("No embeddings file found, create this first")
-
         lines = file_object.readlines()
         if len(lines) == 0:
             raise UserWarning("No embeddings, create this first")
@@ -83,23 +60,24 @@ class SimpleFacerec:
         for line in lines:
             person_name = line.split(";")[0]
             encodings = line.split(";")[1:-1]
-            key_points = []
-            for i in range(len(encodings)):
-                x, y = encodings[i].split(",")
-                key_points.append(NormalizedKeypoint(x=float(x), y=float(y)))
+            encodings = [float(x) for x in encodings]
+            self.known_encodings.append((person_name, encodings))
 
-            self.known_encodings.append((person_name, key_points))
-
-    def face_k_lowest_distances(self, key_points, k):
+    def face_k_lowest_distances(self, encoding, k):
         arr_temp = []
         for person_name_temp, enc in self.known_encodings:
-            distance = euclidean_distance(key_points, enc)
-            arr_temp.append((float(distance), person_name_temp))
-        array_names = []
+            distance = face_recognition.face_distance([enc], encoding)
+            if distance < 0.55:
+                arr_temp.append((distance, person_name_temp))
 
-        for (d, n) in sorted(arr_temp)[:k]:
+        if len(arr_temp) == 0:
+            return None
+        array_names = []
+        sorted_list = sorted(arr_temp)[:k]
+        for (d, n) in sorted_list:
             array_names.append(n)
 
+        print(sorted_list)
         counts = Counter(array_names)
         print(counts)
         return counts.most_common(1)[0][0]

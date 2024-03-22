@@ -11,7 +11,7 @@ from mediapipe.tasks.python.components.containers import NormalizedLandmark
 from mediapipe.tasks.python.vision.core.vision_task_running_mode import VisionTaskRunningMode
 
 TASK_MODEL = '../../models/face_landmarker.task'
-EMBEDDINGS_FILE = "embeddings.csv"
+EMBEDDINGS_FILE = "embeddings_1.csv"
 
 base_options = python.BaseOptions(model_asset_path=TASK_MODEL)
 options = vision.FaceLandmarkerOptions(base_options=base_options,
@@ -27,11 +27,9 @@ def get_image_encodings(path, name):
     img = cv2.imread(file)
     image = mp.Image(image_format=mp.ImageFormat.SRGB, data=img)
     detection_result = detector.detect(image)
-    if len(detection_result.face_landmarks) == 1:   # case 1 detection found
+    if len(detection_result.face_landmarks) == 1:  # case 1 detection found
         return detection_result.face_landmarks[0]
     return None
-
-
 
 
 def distance_normalized_keypoint(keypoint1: NormalizedLandmark, keypoint2: NormalizedLandmark):
@@ -52,7 +50,6 @@ class LandmarkFaceRec:
 
     def __init__(self):
         self.known_encodings = []
-
 
     def save_encodings_images(self, path):
         if Path(EMBEDDINGS_FILE).is_file():
@@ -96,17 +93,6 @@ class LandmarkFaceRec:
                 key_points.append(NormalizedLandmark(x=float(x), y=float(y), z=float(z)))
 
             self.known_encodings.append((person_name, key_points))
-
-    def face_lowest_distances(self, keypoints):
-        min_element = None
-        person_name = None
-        for person_name_temp, enc in self.known_encodings:
-            distance = euclidean_distance(keypoints, enc)
-            print(person_name_temp, distance)
-            if min_element is None or distance < min_element:
-                min_element = distance
-                person_name = person_name_temp
-        return min_element, person_name
 
     def face_k_lowest_distances(self, key_points, k):
         arr_temp = []
