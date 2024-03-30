@@ -1,50 +1,43 @@
 import math
 import os
-import pickle
 from collections import Counter
 from pathlib import Path
 
 import cv2
-import mediapipe as mp
-import numpy as np
-from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
 from mediapipe.tasks.python.components.containers.keypoint import NormalizedKeypoint
+from using_mediapipe.video.picture_analyser import PictureAnalyser, get_relative_to_box, XY
 
-MODELS_DETECTOR_TFLITE = '../../models/detector.tflite'
 EMBEDDINGS_FILE = "embeddings.csv"
 
-base_options = python.BaseOptions(model_asset_path=MODELS_DETECTOR_TFLITE)
-options = vision.FaceDetectorOptions(base_options=base_options)
-detector = vision.FaceDetector.create_from_options(options)
-
-
-def get_image_encodings(path, name):
-    file = str(os.path.join(path, name))
-    img = cv2.imread(file)
-    image = mp.Image(image_format=mp.ImageFormat.SRGB, data=img)
-    detection_result = detector.detect(image)
-    if len(detection_result.detections) == 1:
-        return detection_result.detections[0].keypoints
-    return None
 
 
 def distance_normalized_keypoint(keypoint1: NormalizedKeypoint, keypoint2: NormalizedKeypoint):
-    return (keypoint1.x - keypoint2.x) ** 2 + (keypoint1.y - keypoint2.y) ** 2
+    return math.sqrt((keypoint1.x - keypoint2.x) ** 2 + (keypoint1.y - keypoint2.y) ** 2)
 
 
 def euclidean_distance(a, b):
     distance_temp = 0.0
     for i in range(len(a)):
         distance_temp += distance_normalized_keypoint(a[i], b[i])
-    return math.sqrt(distance_temp)
+    return distance_temp
 
 
 class SimpleFacerec:
     known_encodings = []
+    picture_analyser = PictureAnalyser(model=('short_range_model', 0))
 
     def __init__(self):
         self.known_encodings = []
+
+    def get_image_encodings(self, path, name):
+        file = str(os.path.join(path, name))
+        img = cv2.imread(file)
+        embeddings = self.picture_analyser.get_embeddings(img)
+        relative_x_ys = get_relative_to_box(embeddings)
+        if len(relative_x_ys) == 1:
+            return relative_x_ys[0]
+        else:
+            print("Training images should contain one face" + file)
 
     def save_encodings_images(self, path):
         if Path(EMBEDDINGS_FILE).is_file():
@@ -55,7 +48,7 @@ class SimpleFacerec:
                 print(person_name)
                 if filename.lower().endswith(('.jpg', 'jpeg', '.png')):
                     print(filename)
-                    enc = get_image_encodings(os.path.join(path, person_name), filename)
+                    enc = self.get_image_encodings(os.path.join(path, person_name), filename)
                     self.write_encoded_images(person_name, enc)
 
     def write_encoded_images(self, person_name, enc):
@@ -86,8 +79,7 @@ class SimpleFacerec:
             key_points = []
             for i in range(len(encodings)):
                 x, y = encodings[i].split(",")
-                key_points.append(NormalizedKeypoint(x=float(x), y=float(y)))
-
+                key_points.append(XY(x=float(x), y=float(y)))
             self.known_encodings.append((person_name, key_points))
 
     def face_k_lowest_distances(self, key_points, k):
@@ -96,9 +88,10 @@ class SimpleFacerec:
             distance = euclidean_distance(key_points, enc)
             arr_temp.append((float(distance), person_name_temp))
         array_names = []
-
+        print(sorted(arr_temp))
         for (d, n) in sorted(arr_temp)[:k]:
-            array_names.append(n)
+            if d < 25:
+                array_names.append(n)
 
         counts = Counter(array_names)
         print(counts)
