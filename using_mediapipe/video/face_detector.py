@@ -7,9 +7,6 @@ import cv2
 from mediapipe.tasks.python.components.containers.keypoint import NormalizedKeypoint
 from using_mediapipe.video.picture_analyser import PictureAnalyser, get_relative_to_box, XY
 
-EMBEDDINGS_FILE = "embeddings.csv"
-
-
 
 def distance_normalized_keypoint(keypoint1: NormalizedKeypoint, keypoint2: NormalizedKeypoint):
     return math.sqrt((keypoint1.x - keypoint2.x) ** 2 + (keypoint1.y - keypoint2.y) ** 2)
@@ -24,10 +21,12 @@ def euclidean_distance(a, b):
 
 class SimpleFacerec:
     known_encodings = []
-    picture_analyser = PictureAnalyser(model=('short_range_model', 0))
+    picture_analyser = PictureAnalyser()
+    embeddings_file_name = None
 
-    def __init__(self):
+    def __init__(self, embeddings_file_name):
         self.known_encodings = []
+        self.embeddings_file_name = embeddings_file_name
 
     def get_image_encodings(self, path, name):
         file = str(os.path.join(path, name))
@@ -40,7 +39,7 @@ class SimpleFacerec:
             print("Training images should contain one face" + file)
 
     def save_encodings_images(self, path):
-        if Path(EMBEDDINGS_FILE).is_file():
+        if Path(self.embeddings_file_name).is_file():
             raise UserWarning("embeddings file already exists")
         for root, dirs, files in os.walk(path):
             for filename in files:
@@ -54,7 +53,7 @@ class SimpleFacerec:
     def write_encoded_images(self, person_name, enc):
         if person_name is None or enc is None:
             return None
-        file_object = open(EMBEDDINGS_FILE, "a")
+        file_object = open(self.embeddings_file_name, "a")
         file_object.write(f"{person_name};")
         for key_point in enc:
             file_object.write(f"{key_point.x},{key_point.y};")
@@ -64,7 +63,7 @@ class SimpleFacerec:
 
     def read_encoded_images(self):
         try:
-            file_object = open(EMBEDDINGS_FILE, "r")
+            file_object = open(self.embeddings_file_name, "r")
         except OSError or FileNotFoundError:
             print("No such file or directory")
             raise UserWarning("No embeddings file found, create this first")
@@ -94,5 +93,7 @@ class SimpleFacerec:
                 array_names.append(n)
 
         counts = Counter(array_names)
-        print(counts)
-        return counts.most_common(1)[0][0]
+        try:
+            return counts.most_common(1)[0][0]
+        except IndexError:
+            return "No faces found"

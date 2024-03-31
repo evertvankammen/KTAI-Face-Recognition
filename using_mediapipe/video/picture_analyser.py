@@ -43,7 +43,7 @@ def draw_label(emb, frame):
                     FONT_SIZE, TEXT_COLOR, FONT_THICKNESS)
 
 
-def draw_box(emb, frame):
+def get_box(emb):
     image_rows, image_cols, _ = emb.shape
     relative_bounding_box = emb.relative_bounding_box
     rect_start_point = normalized_to_pixel_coordinates(
@@ -53,8 +53,13 @@ def draw_box(emb, frame):
         relative_bounding_box.xmin + relative_bounding_box.width,
         relative_bounding_box.ymin + relative_bounding_box.height, image_cols,
         image_rows)
+    return rect_start_point, rect_end_point
+
+def draw_box(emb, frame):
+    rect_start_point, rect_end_point = get_box(emb)
+    image_rows, image_cols, _ = emb.shape
     cv2.rectangle(frame, rect_start_point, rect_end_point, TEXT_COLOR, 3)
-    return rect_start_point
+
 
 
 def draw_key_points(image, embedding):
@@ -95,6 +100,10 @@ def get_relative_to_box(embeddings):
         for p in emb.relative_key_points:
             x_px_relative = 100 * (p.x - x_min_prc) / w_bbox_prc
             y_px_relative = 100 * (p.y - y_min_prc) / h_bbox_prc
+            if x_px_relative < 0:
+                print("x < 0")
+            if y_px_relative < 0:
+                print("y < 0")
             emb_x_ys.append(XY(x=round(x_px_relative), y=round(y_px_relative)))
         relative_x_ys.append(emb_x_ys)
         emb.xy_relative_to_bbox = emb_x_ys
@@ -105,7 +114,7 @@ class PictureAnalyser:
     model = None
     min_detection_confidence = None
 
-    def __init__(self, min_detection_confidence=0.75, model=('full_range_model', 1)):
+    def __init__(self, min_detection_confidence=0.75, model=1):
         self.model = model
         self.min_detection_confidence = float(min_detection_confidence)
 
