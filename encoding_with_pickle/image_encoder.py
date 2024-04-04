@@ -4,6 +4,23 @@ import cv2
 import os
 
 class ImageEncoder:
+    """
+        Class to encode images using face recognition and save the encodings.
+
+        Args:
+            dataset_directory (str): Path to the directory containing the dataset of images.
+
+        Attributes:
+            dataset_directory (str): Path to the dataset directory.
+            known_encodings (list): List to store face encodings.
+            known_names (list): List to store corresponding names of the people.
+            processed_images_per_person (dict): Dictionary to keep track of processed images for each person.
+
+        Methods:
+            get_image_files: Retrieve image files from the dataset directory.
+            encode_images: Encode images using face recognition.
+            save_encodings: Serialize and save the face encodings and corresponding names to a file.
+    """
     def __init__(self, dataset_directory):
         self.dataset_directory = dataset_directory
         self.known_encodings = []
@@ -11,6 +28,12 @@ class ImageEncoder:
         self.processed_images_per_person = {}
 
     def get_image_files(self):
+        """
+                Retrieve image files from the dataset directory.
+
+                Returns:
+                    list: List of file paths for images.
+        """
         image_files = []
         for root, dirs, files in os.walk(self.dataset_directory):
             for filename in files:
@@ -19,6 +42,16 @@ class ImageEncoder:
         return image_files
 
     def encode_images(self, max_images=None, encode_model='hog'):
+        """
+            Encode images using face recognition.
+
+            Args:
+                max_images (int, optional): Maximum number of images to process per person.
+                encode_model (str, optional): Face detection model to use (default is 'hog').
+
+            Returns:
+                None
+        """
         print("Extracting all images from dataset...")
         image_paths =self.get_image_files()
 
@@ -46,6 +79,15 @@ class ImageEncoder:
                     continue
 
     def save_encodings(self, output_file):
+        """
+            Serialize and save the face encodings and corresponding names to a file.
+
+            Args:
+                output_file (str): Output file path for saving the encodings.
+
+            Returns:
+                None
+        """
         print("Serializing encodings...")
         data = {"encodings": self.known_encodings, "names": self.known_names}
         with open(output_file, "wb") as f:

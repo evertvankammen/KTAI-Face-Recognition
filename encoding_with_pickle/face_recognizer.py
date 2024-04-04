@@ -6,6 +6,31 @@ import time
 from video_processor import VideoLoader
 
 class FaceRecognizer:
+    """
+        Class to recognize faces in a video using pre-trained face encodings.
+
+        Args:
+            video_file (str): Path to the input video file.
+            encodings_file (str): Path to the file containing pre-trained face encodings.
+            output_path (str, optional): Path to save the output video with recognized faces.
+            show_display (bool, optional): Whether to display the processed video.
+            process_every_nth_frame (int, optional): Process every nth frame of the video.
+
+        Attributes:
+            video_file (str): Path to the input video file.
+            encodings_file (str): Path to the file containing pre-trained face encodings.
+            output_path (str): Path to save the output video with recognized faces.
+            show_display (bool): Whether to display the processed video.
+            process_every_nth_frame (int): Process every nth frame of the video.
+            writer: Video writer object for writing processed video.
+
+        Methods:
+            _load_encodings: Load pre-trained face encodings from the specified file.
+            _resize_frame: Resize the frame to the desired width while maintaining aspect ratio.
+            _name_box: Draw a rectangle and put the name label on the detected face.
+            process_video: Process the input video, detect faces, and recognize them.
+            process_video_threaded: Process the video in a separate thread.
+    """
     def __init__(self, video_file, encodings_file,
                  output_path=None, show_display=True, process_every_nth_frame=5):
         self.video_file = video_file
@@ -16,16 +41,46 @@ class FaceRecognizer:
         self.writer = None
 
     def _load_encodings(self):
+        """
+            Load pre-trained face encodings from the specified file.
+
+            Returns:
+                dict: Dictionary containing pre-trained face encodings and corresponding names.
+        """
         print("Loading encodings...")
         data = pickle.loads(open(self.encodings_file, "rb").read())
         return data
 
     def _resize_frame(self, shape, desired_width):
+        """
+            Resize the frame to the desired width while maintaining aspect ratio.
+
+            Args:
+                shape (tuple): Shape of the input frame.
+                desired_width (int): Desired width of the resized frame.
+
+            Returns:
+                tuple: Resized shape of the frame.
+        """
         height, width, _ = shape
         new_height = int(height * (desired_width/ width))
         return desired_width, new_height
 
     def _name_box(selfself, frame, left, top, right, bottom, name):
+        """
+            Draw a rectangle and put the name label on the detected face.
+
+            Args:
+                frame: Input frame.
+                left (int): Left coordinate of the detected face.
+                top (int): Top coordinate of the detected face.
+                right (int): Right coordinate of the detected face.
+                bottom (int): Bottom coordinate of the detected face.
+                name (str): Name to be displayed.
+
+            Returns:
+                None
+        """
         cv2.rectangle(frame, (left, top), (right, bottom),
                       (0, 255, 0), 2)
         y = top - 15 if top - 15 > 15 else top + 15
@@ -33,6 +88,19 @@ class FaceRecognizer:
                     0.75, (0, 255, 0), 2)
 
     def process_video(self, desired_model='hog', upsample_times=2, desired_tolerance=0.6, desired_width=450, desired_frame_rate=30):
+        """
+            Process the input video, detect faces, and recognize them.
+
+            Args:
+                desired_model (str, optional): Face detection model to use (default is 'hog').
+                upsample_times (int, optional): Number of times to upsample the image (default is 2).
+                desired_tolerance (float, optional): Tolerance level for face recognition (default is 0.6).
+                desired_width (int, optional): Desired width of the resized frame (default is 450).
+                desired_frame_rate (int, optional): Desired frame rate of the output video (default is 30).
+
+            Returns:
+                None
+        """
         data = self._load_encodings()
         video_loader = VideoLoader(self.video_file, desired_frame_rate)
         video_loader.open_video()
@@ -49,9 +117,12 @@ class FaceRecognizer:
             if frame_count % self.process_every_nth_frame != 0:
                 continue
 
+
             new_size = self._resize_frame(frame.shape, desired_width)
+
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             rgb = cv2.resize(frame, dsize=new_size, interpolation=cv2.INTER_CUBIC)
+            # rgb = cv2.resize(frame, (0, 0), fx=0.1, fy=0.1)
 
             r = frame.shape[1] / float(rgb.shape[1])
 
@@ -92,8 +163,3 @@ class FaceRecognizer:
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord("q"):
                     break
-
-    def process_video_threaded(self, *args, **kwargs):
-        thread = threading.Thread(target=self.process_video, args=args, kwargs=kwargs)
-        thread.start()
-        return thread
