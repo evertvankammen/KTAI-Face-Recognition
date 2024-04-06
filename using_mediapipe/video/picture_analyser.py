@@ -12,7 +12,7 @@ FONT_THICKNESS = 1
 TEXT_COLOR = (255, 0, 0)  # red
 
 Embedding = recordclass('Embedding', ['nr', 'shape', 'relative_bounding_box', 'relative_key_points', 'label',
-                                      'confidence', 'xy_relative_to_bbox'])
+                                      'confidence', 'xy_relative_to_bbox', 'frame_number', 'file_name'])
 XY = namedtuple('XY', ['x', 'y'])
 
 
@@ -82,9 +82,9 @@ def annotate(frame, embeddings):
     return frame
 
 
-def find_names(embeddings, sfc):
+def find_names(embeddings, sfc, frame_number):
     for emb in embeddings:
-        name = sfc.face_k_lowest_distances(emb.xy_relative_to_bbox, 3)
+        name = sfc.face_k_lowest_distances(emb.xy_relative_to_bbox, 3, frame_number)
         emb.label = name
 
 
@@ -114,7 +114,7 @@ class PictureAnalyser:
     model = None
     min_detection_confidence = None
 
-    def __init__(self, min_detection_confidence=0.75, model=1):
+    def __init__(self, min_detection_confidence, model):
         self.model = model
         self.min_detection_confidence = float(min_detection_confidence)
 
@@ -140,9 +140,9 @@ class PictureAnalyser:
 
             return embeddings
 
-    def analyse_frame(self, frame, sfc):
+    def analyse_frame(self, frame, sfc, frame_number):
         rows, cols, _ = frame.shape
         embeddings = self.get_embeddings(frame)
         get_relative_to_box(embeddings)
-        find_names(embeddings, sfc)
+        find_names(embeddings, sfc, frame_number)
         return annotate(frame.copy(), embeddings)
