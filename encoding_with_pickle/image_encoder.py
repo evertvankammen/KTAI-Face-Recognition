@@ -65,6 +65,7 @@ class ImageEncoder:
             if max_images is None or self.processed_images_per_person[name] < max_images:
                 image = cv2.imread(image_path)
                 rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
                 boxes = face_recognition.face_locations(rgb, model=encode_model)
                 encodings = face_recognition.face_encodings(rgb, boxes)
 

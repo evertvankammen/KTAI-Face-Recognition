@@ -1,9 +1,11 @@
 import face_recognition
 import pickle
 import cv2
-import threading
+import random
 import time
+import os
 from video_processor import VideoLoader
+
 
 class FaceRecognizer:
     """
@@ -31,6 +33,7 @@ class FaceRecognizer:
             process_video: Process the input video, detect faces, and recognize them.
             process_video_threaded: Process the video in a separate thread.
     """
+
     def __init__(self, video_file, encodings_file,
                  output_path=None, show_display=True, process_every_nth_frame=5):
         self.video_file = video_file
@@ -63,10 +66,10 @@ class FaceRecognizer:
                 tuple: Resized shape of the frame.
         """
         height, width, _ = shape
-        new_height = int(height * (desired_width/ width))
+        new_height = int(height * (desired_width / width))
         return desired_width, new_height
 
-    def _name_box(selfself, frame, left, top, right, bottom, name):
+    def _name_box(self, frame, left, top, right, bottom, name):
         """
             Draw a rectangle and put the name label on the detected face.
 
@@ -87,7 +90,22 @@ class FaceRecognizer:
         cv2.putText(frame, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX,
                     0.75, (0, 255, 0), 2)
 
-    def process_video(self, desired_model='hog', upsample_times=2, desired_tolerance=0.6, desired_width=450, desired_frame_rate=30):
+    def _save_recognition_info(self, actor_recognition_info, output_file):
+        """
+        Save actor recognition information to a pickle file.
+
+        Args:
+            actor_recognition_info (list): List containing actor recognition information per frame.
+            output_file (str): Path to the output pickle file.
+
+        Returns:
+            None
+        """
+        with open(output_file, 'wb') as pickle_file:
+            pickle.dump(actor_recognition_info, pickle_file)
+
+    def process_video(self, desired_model='hog', upsample_times=2, desired_tolerance=0.6,
+                      desired_width=450, desired_frame_rate=30, save_probability=0.05):
         """
             Process the input video, detect faces, and recognize them.
 
@@ -97,15 +115,19 @@ class FaceRecognizer:
                 desired_tolerance (float, optional): Tolerance level for face recognition (default is 0.6).
                 desired_width (int, optional): Desired width of the resized frame (default is 450).
                 desired_frame_rate (int, optional): Desired frame rate of the output video (default is 30).
-
+                save_probability (float, optional): Probability of saving each frame (default is 0.1).
             Returns:
                 None
         """
+        experiment_directory = f"experiment_tolerance_{desired_tolerance}_desired_width_{desired_width}_internet_pictures"
+        if not os.path.exists(experiment_directory):
+            os.makedirs(experiment_directory)
         data = self._load_encodings()
         video_loader = VideoLoader(self.video_file, desired_frame_rate)
         video_loader.open_video()
         time.sleep(2.0)
         frame_count = 0
+        actor_recognition_info = []
 
         while video_loader.capture.isOpened():
             _, frame = video_loader.capture.read()
@@ -117,7 +139,6 @@ class FaceRecognizer:
             if frame_count % self.process_every_nth_frame != 0:
                 continue
 
-
             new_size = self._resize_frame(frame.shape, desired_width)
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -126,7 +147,8 @@ class FaceRecognizer:
 
             r = frame.shape[1] / float(rgb.shape[1])
 
-            boxes = face_recognition.face_locations(rgb, model=desired_model, number_of_times_to_upsample=upsample_times)
+            boxes = face_recognition.face_locations(rgb, model=desired_model,
+                                                    number_of_times_to_upsample=upsample_times)
             encodings = face_recognition.face_encodings(rgb, boxes)
             names = []
 
@@ -144,12 +166,20 @@ class FaceRecognizer:
 
                 names.append(name)
 
+            frame_info = {'frame_number': frame_count, 'actors': names}
+            actor_recognition_info.append(frame_info)
+
             for ((top, right, bottom, left), name) in zip(boxes, names):
                 top = int(top * r)
                 right = int(right * r)
                 bottom = int(bottom * r)
                 left = int(left * r)
                 self._name_box(frame, left, top, right, bottom, name)
+
+                if random.random() < save_probability:
+                    filename = os.path.join(experiment_directory, f"frame_{frame_count}.jpg")
+                    print(f"saving image to {filename}")
+                    cv2.imwrite(filename, frame)
 
                 if self.writer is None and self.output_path is not None:
                     fourcc = cv2.VideoWriter_fourcc(*"MJPG")
@@ -163,3 +193,5 @@ class FaceRecognizer:
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord("q"):
                     break
+        save_recognition = os.path.join(experiment_directory, "frames_information")
+        self._save_recognition_info(actor_recognition_info, save_recognition)
