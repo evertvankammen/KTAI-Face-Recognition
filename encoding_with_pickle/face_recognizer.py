@@ -4,6 +4,8 @@ import cv2
 import random
 import time
 import os
+
+from encoding_with_pickle.take_box_picture import save_partial_image
 from video_processor import VideoLoader
 
 
@@ -116,6 +118,7 @@ class FaceRecognizer:
                 desired_width (int, optional): Desired width of the resized frame (default is 450).
                 desired_frame_rate (int, optional): Desired frame rate of the output video (default is 30).
                 save_probability (float, optional): Probability of saving each frame (default is 0.1).
+                sample_rate_override
             Returns:
                 None
         """
@@ -177,9 +180,10 @@ class FaceRecognizer:
                 self._name_box(frame, left, top, right, bottom, name)
 
                 if random.random() < save_probability:
-                    filename = os.path.join(experiment_directory, f"frame_{frame_count}.jpg")
-                    print(f"saving image to {filename}")
-                    cv2.imwrite(filename, frame)
+                    # filename = os.path.join(experiment_directory, f"frame_{frame_count}.jpg")
+                    # print(f"saving image to {filename}")
+                    # cv2.imwrite(filename, frame)
+                    save_partial_image(frame, (top, right, bottom, left), name, experiment_directory, frame_count)
 
                 if self.writer is None and self.output_path is not None:
                     fourcc = cv2.VideoWriter_fourcc(*"MJPG")
