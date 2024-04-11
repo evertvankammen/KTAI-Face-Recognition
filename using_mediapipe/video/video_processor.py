@@ -3,25 +3,25 @@ import os
 import random
 
 import cv2
+from typing_extensions import deprecated
 
-from face_detector import SimpleFacerec
-from using_mediapipe.video.picture_analyser import PictureAnalyser, normalized_to_pixel_coordinates, get_box
+from using_mediapipe.video.face_detector import SimpleFacerec
+from using_mediapipe.video.picture_analyser import PictureAnalyser, get_box
 
 IMAGE_PATH = os.path.join("..", "..", "data", "pictures")
-#IMAGE_PATH_EMBEDDINGS = os.path.join("..", "..", "data", "embeddings")
+
 IMAGE_PATH_EMBEDDINGS = os.path.join("..", "..", "encoding_with_pickle", "dataset")
-VIDEO_PATH = os.path.join("..", "..", "data", "movies")
-IMAGE_SAVE_PATH = os.path.join("..", "..", "data",  "ground_truth")
+
 MIN_DETECTION_CONFIDENCE = 0.75
 SAVE_EMBEDDING_RATE = 10
 
 
-def save_encodings_to_file(embeddings_file_name, file_location,min_detection_confidence, model):
+def save_encodings_to_file(embeddings_file_name, file_location, min_detection_confidence, model):
     sfc = SimpleFacerec(embeddings_file_name, min_detection_confidence, model)
     sfc.save_encodings_images(file_location)
 
 
-def save_random_image(frame, embeddings, frame_duration_counter):
+def save_image(frame, embeddings, frame_duration_counter, image_save_path):
     for nr in range(len(embeddings)):
         emb = embeddings[nr]
         image_rows, image_cols, _ = emb.shape
@@ -30,14 +30,12 @@ def save_random_image(frame, embeddings, frame_duration_counter):
         height = (e_y - s_y)
 
         margin = math.floor(width * .50)
-        #if width < 150:
-        #    continue
-        # name = detection.categories[0].display_name
         x, y = s_x - margin, s_y - margin
-        w, h = width + 2*margin, height + 2*margin
+        w, h = width + 2 * margin, height + 2 * margin
         try:
             box_image = frame[y: y + h, x: x + w]
-            success = cv2.imwrite(os.path.join(IMAGE_SAVE_PATH, f"image_{round(frame_duration_counter)}_{nr}.jpg"), box_image)
+            success = cv2.imwrite(os.path.join(image_save_path, f"image_{round(frame_duration_counter)}_{nr}.jpg"),
+                                  box_image)
             print(success)
         except cv2.error as e1:
             print(e1)
@@ -45,9 +43,9 @@ def save_random_image(frame, embeddings, frame_duration_counter):
             print(e2)
 
 
-def take_pictures(video_file_name,min_detection_confidence, model, sample_chance: int):
-    picture_analyser = PictureAnalyser(min_detection_confidence=min_detection_confidence,model=model)
-    video_file = os.path.join(VIDEO_PATH, video_file_name)
+def take_pictures(video_file_name, min_detection_confidence, model, sample_chance: int, image_save_path):
+    picture_analyser = PictureAnalyser(min_detection_confidence=min_detection_confidence, model=model)
+    video_file = video_file_name
     cap = cv2.VideoCapture(video_file)
     fps = cap.get(cv2.CAP_PROP_FPS)
     frame_duration = 1000 / fps
@@ -61,7 +59,7 @@ def take_pictures(video_file_name,min_detection_confidence, model, sample_chance
                 try:
                     frames_sampled = frames_sampled + 1
                     embeddings = picture_analyser.get_embeddings(frame)
-                    save_random_image(frame, embeddings, frame_counter)
+                    save_image(frame, embeddings, frame_counter,image_save_path=image_save_path)
                 except Exception as e2:
                     print(e2)
             frame_counter = frame_counter + 1
@@ -71,10 +69,25 @@ def take_pictures(video_file_name,min_detection_confidence, model, sample_chance
 
     return frame_counter, frames_sampled, fps
 
-def run_face_detector(video_file_name, embeddings_file_name,min_detection_confidence, model):
+
+def run_face_detector(video_file_name, embeddings_file_name, min_detection_confidence, model):
+    """
+    Runs the face detector on a video file and returns the number of frames processed and the frames per second (fps) of the video.
+
+    Parameters:
+    - video_file_name (str): The name of the video file.
+    - embeddings_file_name (str): The name of the file containing encoded images for face recognition.
+    - min_detection_confidence (float): The minimum confidence level for face detection.
+    - model: The face detection model.
+
+    Returns:
+    - frame_counter (int): The number of frames processed in the video.
+    - fps (float): The frames per second (fps) of the video.
+
+    """
     sfc = SimpleFacerec(embeddings_file_name, min_detection_confidence, model)
     sfc.read_encoded_images()
-    picture_analyser = PictureAnalyser(min_detection_confidence=min_detection_confidence,model=model)
+    picture_analyser = PictureAnalyser(min_detection_confidence=min_detection_confidence, model=model)
     video_file = os.path.join(VIDEO_PATH, video_file_name)
     cap = cv2.VideoCapture(video_file)
     fps = cap.get(cv2.CAP_PROP_FPS)

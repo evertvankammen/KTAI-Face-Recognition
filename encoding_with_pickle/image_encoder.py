@@ -3,6 +3,7 @@ import pickle
 import cv2
 import os
 
+
 class ImageEncoder:
     """
         Class to encode images using face recognition and save the encodings.
@@ -21,6 +22,7 @@ class ImageEncoder:
             encode_images: Encode images using face recognition.
             save_encodings: Serialize and save the face encodings and corresponding names to a file.
     """
+
     def __init__(self, dataset_directory):
         self.dataset_directory = dataset_directory
         self.known_encodings = []
@@ -53,7 +55,7 @@ class ImageEncoder:
                 None
         """
         print("Extracting all images from dataset...")
-        image_paths =self.get_image_files()
+        image_paths = self.get_image_files()
 
         for (i, image_path) in enumerate(image_paths):
             print("Processing image {}/{}".format(i + 1, len(image_paths)))
@@ -75,7 +77,8 @@ class ImageEncoder:
 
                 self.processed_images_per_person[name] += 1
 
-                if max_images is not None and all(count>= max_images for count in self.processed_images_per_person.values()):
+                if max_images is not None and all(
+                        count >= max_images for count in self.processed_images_per_person.values()):
                     print("Maximum number of images of {} are processed".format(name))
                     continue
 
@@ -92,5 +95,4 @@ class ImageEncoder:
         print("Serializing encodings...")
         data = {"encodings": self.known_encodings, "names": self.known_names}
         with open(output_file, "wb") as f:
-            pickle.dump(data, f )
-
+            pickle.dump(data, f)

@@ -1,3 +1,5 @@
+from collections import Counter
+
 import face_recognition
 import pickle
 import cv2
@@ -6,7 +8,10 @@ import time
 import os
 
 from encoding_with_pickle.take_box_picture import save_partial_image
-from video_processor import VideoLoader
+from encoding_with_pickle.video_processor import VideoLoader
+
+found_names_list = []
+found_names_list_with_frame_number = []
 
 
 class FaceRecognizer:
@@ -107,7 +112,7 @@ class FaceRecognizer:
             pickle.dump(actor_recognition_info, pickle_file)
 
     def process_video(self, desired_model='hog', upsample_times=2, desired_tolerance=0.6,
-                      desired_width=450, desired_frame_rate=30, save_probability=0.05):
+                      desired_width=450, desired_frame_rate=30, sample_probability=0.1, save_images=False):
         """
             Process the input video, detect faces, and recognize them.
 
@@ -117,8 +122,8 @@ class FaceRecognizer:
                 desired_tolerance (float, optional): Tolerance level for face recognition (default is 0.6).
                 desired_width (int, optional): Desired width of the resized frame (default is 450).
                 desired_frame_rate (int, optional): Desired frame rate of the output video (default is 30).
-                save_probability (float, optional): Probability of saving each frame (default is 0.1).
-                sample_rate_override
+                sample_probability (float, optional): Probability of checking a frame (default is 0.1).
+                save_images (bool, optional): Whether to save the images of faces (default is False)
             Returns:
                 None
         """
@@ -130,6 +135,7 @@ class FaceRecognizer:
         video_loader.open_video()
         time.sleep(2.0)
         frame_count = 0
+        sample_count = 0
         actor_recognition_info = []
 
         while video_loader.capture.isOpened():
@@ -139,9 +145,10 @@ class FaceRecognizer:
                 break
 
             frame_count += 1
-            if frame_count % self.process_every_nth_frame != 0:
+            if random.random() >= sample_probability:
                 continue
 
+            sample_count += 1
             new_size = self._resize_frame(frame.shape, desired_width)
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -168,6 +175,8 @@ class FaceRecognizer:
                     name = max(counts, key=counts.get)
 
                 names.append(name)
+                found_names_list.append(name)
+                found_names_list_with_frame_number.append((name, frame_count))
 
             frame_info = {'frame_number': frame_count, 'actors': names}
             actor_recognition_info.append(frame_info)
@@ -179,10 +188,7 @@ class FaceRecognizer:
                 left = int(left * r)
                 self._name_box(frame, left, top, right, bottom, name)
 
-                if random.random() < save_probability:
-                    # filename = os.path.join(experiment_directory, f"frame_{frame_count}.jpg")
-                    # print(f"saving image to {filename}")
-                    # cv2.imwrite(filename, frame)
+                if save_images:
                     save_partial_image(frame, (top, right, bottom, left), name, experiment_directory, frame_count)
 
                 if self.writer is None and self.output_path is not None:
@@ -199,3 +205,4 @@ class FaceRecognizer:
                     break
         save_recognition = os.path.join(experiment_directory, "frames_information")
         self._save_recognition_info(actor_recognition_info, save_recognition)
+        return frame_count, sample_count, found_names_list_with_frame_number, Counter(found_names_list)

@@ -55,11 +55,11 @@ def get_box(emb):
         image_rows)
     return rect_start_point, rect_end_point
 
+
 def draw_box(emb, frame):
     rect_start_point, rect_end_point = get_box(emb)
     image_rows, image_cols, _ = emb.shape
     cv2.rectangle(frame, rect_start_point, rect_end_point, TEXT_COLOR, 3)
-
 
 
 def draw_key_points(image, embedding):
