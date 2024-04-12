@@ -1,7 +1,8 @@
 from face_recognizer import FaceRecognizer
 import os
 
-video_file = os.path.join("..", "data", "pictures", "Friends.mp4")
+# video_file = os.path.join("..", "data", "pictures", "Friends.mp4")
+video_file = os.path.join("..", "data", "movies", "The Ones With Chandler's Sarcasm _ Friends.mp4")
 encodings_file = "encodings_hog.pickle"
 output_path = os.path.join("output_result_videos", "test3.avi")
 
