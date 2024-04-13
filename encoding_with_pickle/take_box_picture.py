@@ -1,6 +1,5 @@
 import math
 import os
-from typing import Tuple, Union
 
 import cv2
 
