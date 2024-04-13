@@ -1,4 +1,5 @@
 from collections import Counter
+from operator import mod
 
 import face_recognition
 import pickle
@@ -10,11 +11,10 @@ import os
 from encoding_with_pickle.take_box_picture import save_partial_image
 from encoding_with_pickle.video_processor import VideoLoader
 
-found_names_list = []
-found_names_list_with_frame_number = []
-
 
 class FaceRecognizer:
+    found_names_list = []
+    found_names_list_with_frame_number = []
     """
         Class to recognize faces in a video using pre-trained face encodings.
 
@@ -42,13 +42,15 @@ class FaceRecognizer:
     """
 
     def __init__(self, video_file, encodings_file,
-                 output_path=None, show_display=True, process_every_nth_frame=5):
+                 output_path=None, show_display=True, process_every_nth_frame=1, process_nr=1, total_processes=1):
         self.video_file = video_file
         self.encodings_file = encodings_file
         self.output_path = output_path
         self.show_display = show_display
         self.process_every_nth_frame = process_every_nth_frame
         self.writer = None
+        self.process_nr = process_nr
+        self.total_processes = total_processes
 
     def _load_encodings(self):
         """
@@ -128,8 +130,8 @@ class FaceRecognizer:
                 None
         """
         experiment_directory = f"experiment_tolerance_{desired_tolerance}_desired_width_{desired_width}_internet_pictures"
-        if not os.path.exists(experiment_directory):
-            os.makedirs(experiment_directory)
+        #if not os.path.exists(experiment_directory):
+            # os.makedirs(experiment_directory)
         data = self._load_encodings()
         video_loader = VideoLoader(self.video_file, desired_frame_rate)
         video_loader.open_video()
@@ -145,10 +147,14 @@ class FaceRecognizer:
                 break
 
             frame_count += 1
-            if random.random() >= sample_probability:
+            r = random.random()
+            if (frame_count - 1) % self.total_processes != (self.process_nr - 1) or r >= sample_probability:
                 continue
 
             sample_count += 1
+
+            print(frame_count, sample_count, self.process_nr)
+
             new_size = self._resize_frame(frame.shape, desired_width)
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -175,8 +181,8 @@ class FaceRecognizer:
                     name = max(counts, key=counts.get)
 
                 names.append(name)
-                found_names_list.append(name)
-                found_names_list_with_frame_number.append((name, frame_count))
+                self.found_names_list.append(name)
+                self.found_names_list_with_frame_number.append((name, frame_count))
 
             frame_info = {'frame_number': frame_count, 'actors': names}
             actor_recognition_info.append(frame_info)
@@ -203,6 +209,6 @@ class FaceRecognizer:
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord("q"):
                     break
-        save_recognition = os.path.join(experiment_directory, "frames_information")
-        self._save_recognition_info(actor_recognition_info, save_recognition)
-        return frame_count, sample_count, found_names_list_with_frame_number, Counter(found_names_list)
+        # save_recognition = os.path.join(experiment_directory, "frames_information")
+        # self._save_recognition_info(actor_recognition_info, save_recognition)
+        return frame_count, sample_count, self.found_names_list_with_frame_number, Counter(self.found_names_list)
