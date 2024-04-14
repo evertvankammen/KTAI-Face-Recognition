@@ -1,5 +1,4 @@
 from collections import Counter
-from operator import mod
 
 import face_recognition
 import pickle
@@ -7,9 +6,10 @@ import cv2
 import random
 import time
 import os
+import numpy
 
-from encoding_with_pickle.take_box_picture import save_partial_image
-from encoding_with_pickle.video_processor import VideoLoader
+from take_box_picture import save_partial_image
+from video_processor import VideoLoader
 
 
 class FaceRecognizer:
@@ -42,15 +42,13 @@ class FaceRecognizer:
     """
 
     def __init__(self, video_file, encodings_file,
-                 output_path=None, show_display=True, process_every_nth_frame=1, process_nr=1, total_processes=1):
+                 output_path=None, show_display=True, process_every_nth_frame=5):
         self.video_file = video_file
         self.encodings_file = encodings_file
         self.output_path = output_path
         self.show_display = show_display
         self.process_every_nth_frame = process_every_nth_frame
         self.writer = None
-        self.process_nr = process_nr
-        self.total_processes = total_processes
 
     def _load_encodings(self):
         """
@@ -114,7 +112,7 @@ class FaceRecognizer:
             pickle.dump(actor_recognition_info, pickle_file)
 
     def process_video(self, desired_model='hog', upsample_times=2, desired_tolerance=0.6,
-                      desired_width=450, desired_frame_rate=30, sample_probability=0.1, save_images=False):
+                      desired_width=750, desired_frame_rate=30, sample_probability=0.1, save_images=True):
         """
             Process the input video, detect faces, and recognize them.
 
@@ -132,6 +130,9 @@ class FaceRecognizer:
         experiment_directory = f"experiment_tolerance_{desired_tolerance}_desired_width_{desired_width}_internet_pictures"
         #if not os.path.exists(experiment_directory):
             # os.makedirs(experiment_directory)
+        experiment_directory = f"experiment_tolerance_{desired_tolerance}_internet_pictures_sample_probability_{sample_probability}"
+        if not os.path.exists(experiment_directory):
+            os.makedirs(experiment_directory)
         data = self._load_encodings()
         video_loader = VideoLoader(self.video_file, desired_frame_rate)
         video_loader.open_video()
@@ -159,7 +160,6 @@ class FaceRecognizer:
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             rgb = cv2.resize(frame, dsize=new_size, interpolation=cv2.INTER_CUBIC)
-            # rgb = cv2.resize(frame, (0, 0), fx=0.1, fy=0.1)
 
             r = frame.shape[1] / float(rgb.shape[1])
 
@@ -195,7 +195,11 @@ class FaceRecognizer:
                 self._name_box(frame, left, top, right, bottom, name)
 
                 if save_images:
-                    save_partial_image(frame, (top, right, bottom, left), name, experiment_directory, frame_count)
+                    filename = os.path.join(experiment_directory, f"frame_{frame_count}.jpg")
+                    print(f"saving image to {filename}")
+                    cv2.imwrite(filename, frame)
+                    # save_partial_image(frame, (top, right, bottom, left), name, experiment_directory, frame_count)
+
 
                 if self.writer is None and self.output_path is not None:
                     fourcc = cv2.VideoWriter_fourcc(*"MJPG")
