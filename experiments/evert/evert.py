@@ -32,7 +32,7 @@ def analyse_film():
                                                                                                  save_images=False)
 
     print(frames, sampled, counted)
-    with open('exp_set_from_movie_results.txt', 'w') as fp:
+    with open('exp_set_from_movie_results_450.txt', 'w') as fp:
         fp.write('sampled: ' + str(sampled) + '\n')
         fp.write(str(counted) + '\n')
         fp.write('\n'.join('%s %s' % x for x in found_names_list_with_frame_number))

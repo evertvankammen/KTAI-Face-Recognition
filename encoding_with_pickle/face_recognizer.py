@@ -6,9 +6,10 @@ import cv2
 import random
 import time
 import os
+import numpy
 
-from encoding_with_pickle.take_box_picture import save_partial_image
-from encoding_with_pickle.video_processor import VideoLoader
+from take_box_picture import save_partial_image
+from video_processor import VideoLoader
 
 found_names_list = []
 found_names_list_with_frame_number = []
@@ -112,7 +113,7 @@ class FaceRecognizer:
             pickle.dump(actor_recognition_info, pickle_file)
 
     def process_video(self, desired_model='hog', upsample_times=2, desired_tolerance=0.6,
-                      desired_width=450, desired_frame_rate=30, sample_probability=0.1, save_images=False):
+                      desired_width=750, desired_frame_rate=30, sample_probability=0.1, save_images=True):
         """
             Process the input video, detect faces, and recognize them.
 
@@ -127,7 +128,7 @@ class FaceRecognizer:
             Returns:
                 None
         """
-        experiment_directory = f"experiment_tolerance_{desired_tolerance}_desired_width_{desired_width}_internet_pictures"
+        experiment_directory = f"experiment_tolerance_{desired_tolerance}_internet_pictures_sample_probability_{sample_probability}"
         if not os.path.exists(experiment_directory):
             os.makedirs(experiment_directory)
         data = self._load_encodings()
@@ -145,6 +146,7 @@ class FaceRecognizer:
                 break
 
             frame_count += 1
+            print(frame_count)
             if random.random() >= sample_probability:
                 continue
 
@@ -153,7 +155,6 @@ class FaceRecognizer:
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             rgb = cv2.resize(frame, dsize=new_size, interpolation=cv2.INTER_CUBIC)
-            # rgb = cv2.resize(frame, (0, 0), fx=0.1, fy=0.1)
 
             r = frame.shape[1] / float(rgb.shape[1])
 
@@ -189,7 +190,11 @@ class FaceRecognizer:
                 self._name_box(frame, left, top, right, bottom, name)
 
                 if save_images:
-                    save_partial_image(frame, (top, right, bottom, left), name, experiment_directory, frame_count)
+                    filename = os.path.join(experiment_directory, f"frame_{frame_count}.jpg")
+                    print(f"saving image to {filename}")
+                    cv2.imwrite(filename, frame)
+                    # save_partial_image(frame, (top, right, bottom, left), name, experiment_directory, frame_count)
+
 
                 if self.writer is None and self.output_path is not None:
                     fourcc = cv2.VideoWriter_fourcc(*"MJPG")
