@@ -1,21 +1,18 @@
-from collections import Counter
-
-import face_recognition
+import os
 import pickle
-import cv2
 import random
 import time
-import os
-import numpy
+from collections import Counter
 
-from take_box_picture import save_partial_image
-from video_processor import VideoLoader
+import cv2
+import face_recognition
 
-found_names_list = []
-found_names_list_with_frame_number = []
+from encoding_with_pickle.video_processor import VideoLoader
 
 
 class FaceRecognizer:
+    found_names_list = []
+    found_names_list_with_frame_number = []
     """
         Class to recognize faces in a video using pre-trained face encodings.
 
@@ -43,13 +40,16 @@ class FaceRecognizer:
     """
 
     def __init__(self, video_file, encodings_file,
-                 output_path=None, show_display=True, process_every_nth_frame=5):
+                 output_path=None, show_display=True, process_every_nth_frame=5, process_nr=1, total_processes=1):
         self.video_file = video_file
         self.encodings_file = encodings_file
         self.output_path = output_path
         self.show_display = show_display
         self.process_every_nth_frame = process_every_nth_frame
         self.writer = None
+        self.process_nr = process_nr
+        self.total_processes = total_processes
+
 
     def _load_encodings(self):
         """
@@ -146,11 +146,14 @@ class FaceRecognizer:
                 break
 
             frame_count += 1
-            print(frame_count)
-            if random.random() >= sample_probability:
+            r = random.random()
+            if (frame_count - 1) % self.total_processes != (self.process_nr - 1) or r >= sample_probability:
                 continue
 
             sample_count += 1
+
+            print(frame_count, sample_count, self.process_nr)
+
             new_size = self._resize_frame(frame.shape, desired_width)
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -176,8 +179,8 @@ class FaceRecognizer:
                     name = max(counts, key=counts.get)
 
                 names.append(name)
-                found_names_list.append(name)
-                found_names_list_with_frame_number.append((name, frame_count))
+                self.found_names_list.append(name)
+                self.found_names_list_with_frame_number.append((name, frame_count))
 
             frame_info = {'frame_number': frame_count, 'actors': names}
             actor_recognition_info.append(frame_info)
@@ -195,7 +198,6 @@ class FaceRecognizer:
                     cv2.imwrite(filename, frame)
                     # save_partial_image(frame, (top, right, bottom, left), name, experiment_directory, frame_count)
 
-
                 if self.writer is None and self.output_path is not None:
                     fourcc = cv2.VideoWriter_fourcc(*"MJPG")
                     self.writer = cv2.VideoWriter(self.output_path, fourcc, 20, (frame.shape[1], frame.shape[0]), True)
@@ -210,4 +212,4 @@ class FaceRecognizer:
                     break
         save_recognition = os.path.join(experiment_directory, "frames_information")
         self._save_recognition_info(actor_recognition_info, save_recognition)
-        return frame_count, sample_count, found_names_list_with_frame_number, Counter(found_names_list)
+        return frame_count, sample_count, self.found_names_list_with_frame_number, Counter(self.found_names_list)
