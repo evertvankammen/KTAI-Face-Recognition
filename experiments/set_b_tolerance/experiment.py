@@ -46,7 +46,7 @@ def plot_actor_frequencies(file_path, tolerance, multiplier=1.0):
 if __name__ == '__main__':
     # create_bars()
     # create_encodings()
-    experiment(nr_of_processes=32, desired_tolerance=0.50, model='hog')
+    # experiment(nr_of_processes=32, desired_tolerance=0.50, model='hog')
     # experiment(nr_of_processes=32, desired_tolerance=0.60, model='hog')
     # experiment(nr_of_processes=32, desired_tolerance=0.70, model='hog')
 

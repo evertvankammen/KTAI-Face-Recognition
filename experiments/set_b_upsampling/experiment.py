@@ -51,14 +51,13 @@ def plot_actor_frequencies(file_path, up_sampling):
 if __name__ == '__main__':
     # experiment(nr_of_processes=32, up_sampling_factor=0, model='hog')
     # experiment(nr_of_processes=32, up_sampling_factor=1, model='hog')
-    # experiment(nr_of_processes=32, up_sampling_factor=2, model='hog')
+    # experiment(nr_of_processes=16, up_sampling_factor=2, model='hog')
 
     # experiment(nr_of_processes=32, up_sampling_factor=0, model='cnn')
     # experiment(nr_of_processes=32, up_sampling_factor=1, model='cnn')
     # experiment(nr_of_processes=32, up_sampling_factor=2, model='cnn')
 
-    plot_actor_frequencies("exp_results_t_0.6_m_hog_u_0.txt", 0)
-    plot_actor_frequencies("exp_results_t_0.6_m_hog_u_1.txt", 1)
-    # plot_actor_frequencies("exp_results_2.txt", 2)
-    # plot_actor_frequencies("exp_results_3.txt", 3)
-    # plot_actor_frequencies("exp_results_4.txt", 4)
+    # plot_actor_frequencies("exp_results_t_0.6_m_hog_u_0.txt", 0)
+    # plot_actor_frequencies("exp_results_t_0.6_m_hog_u_1.txt", 1)
+    plot_actor_frequencies("exp_results_t_0.6_m_hog_u_2.txt", 2)
+
