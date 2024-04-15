@@ -146,8 +146,8 @@ class FaceRecognizer:
                 break
 
             frame_count += 1
-            r = random.random()
-            if (frame_count - 1) % self.total_processes != (self.process_nr - 1) or r >= sample_probability:
+
+            if (frame_count - 1) % self.total_processes != (self.process_nr - 1) or random.random() >= sample_probability:
                 continue
 
             sample_count += 1
