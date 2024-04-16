@@ -7,7 +7,7 @@ from collections import Counter
 import cv2
 import face_recognition
 
-from video_processor import VideoLoader
+from encoding_with_pickle.video_processor import VideoLoader
 
 
 class FaceRecognizer:
