@@ -7,7 +7,7 @@ from collections import Counter
 import cv2
 import face_recognition
 
-from encoding_with_pickle.video_processor import VideoLoader
+from video_processor import VideoLoader
 
 
 class FaceRecognizer:
@@ -128,7 +128,8 @@ class FaceRecognizer:
             Returns:
                 None
         """
-        experiment_directory = f"experiment_tolerance_{desired_tolerance}_internet_pictures_sample_probability_{sample_probability}"
+        experiment_directory = (f"experiment_tolerance_{desired_tolerance}_internet_pictures"
+                                f"_sample_probability_{sample_probability}_upsample_times_{upsample_times}_desired_width_{desired_width}")
         if not os.path.exists(experiment_directory):
             os.makedirs(experiment_directory)
         data = self._load_encodings()

@@ -12,12 +12,12 @@ face_recognizer = FaceRecognizer(video_file, encodings_file, output_path=output_
 frames, sampled, found_names_list_with_frame_number, counted = face_recognizer.process_video(desired_tolerance=0.60,
                                                                                                  desired_width=750,
                                                                                                  desired_model='hog',
-                                                                                                 upsample_times=1,
+                                                                                                 upsample_times=0,
                                                                                                  sample_probability=1,
                                                                                                  save_images=False)
 
 print(frames, sampled, counted)
-with open(f'exp_set_from_movie_results_tolerance_60_upsample_1_internetpictures_desired_width_750.txt', 'w') as fp:
+with open(f'exp_set_from_movie_results_tolerance_60_upsample_0_internetpictures_desired_width_750.txt', 'w') as fp:
     fp.write('sampled: ' + str(sampled) + '\n')
     fp.write(str(counted) + '\n')
     fp.write('\n'.join('%s %s' % x for x in found_names_list_with_frame_number))

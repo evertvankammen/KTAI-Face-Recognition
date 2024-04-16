@@ -3,7 +3,7 @@ from collections import Counter
 from collections import defaultdict
 import os
 
-def plot_actor_frequencies(file_path, tolerance):
+def plot_actor_frequencies(file_path, tolerance, upsample):
     """Plot the frequency of recognized actors over video frames."""
     with open(file_path, 'r') as fp:
         lines = fp.readlines()
@@ -16,7 +16,7 @@ def plot_actor_frequencies(file_path, tolerance):
     actors = ['Chandler', 'Joey', 'Monica', 'Phoebe', 'Rachel', 'Ross', 'Unknown']
     frequencies = [name_counter[actor] for actor in actors]
     # Aangepaste kleuren voor elke acteur
-    colors = ['blue', 'green', 'red', 'purple', 'orange', 'brown', 'gray']
+    colors = ['red', 'blue', 'green', 'orange', 'purple', 'brown', 'gray']
 
     plt.bar(actors, frequencies, color=colors)
     plt.xlabel('Actors')
@@ -25,12 +25,13 @@ def plot_actor_frequencies(file_path, tolerance):
     plt.xticks(rotation=45)
     plt.ylim([0, max(frequencies) * 1.1])  # Set y-axis limit slightly above the maximum frequency
 
-    store_experiment = os.path.join("..", "..", "experiments", "ralph", f"frequency_actors_recognized_tolerance_{tolerance}_sample_probability_0.25.png")
+    store_experiment = os.path.join("..", "..", "experiments", "ralph", f"Experiment_2_set_A_frequency_tolerance_{tolerance}"
+                                                                        f"_upsample_{upsample}.png")
     plt.savefig(store_experiment)  # save the figure to file
 
     plt.show()
 
-def plot_video_frames(file_path, tolerance):
+def plot_video_frames(file_path, tolerance, upsample):
     """Plot frames where actors are recognized from a text file."""
     actor_frames = defaultdict(list)
 
@@ -60,11 +61,12 @@ def plot_video_frames(file_path, tolerance):
     plt.xticks(rotation=45)
     plt.grid(True)
 
-    store_experiment = os.path.join("..", "..", "experiments", "ralph", f"actor_frames_tolerance_{tolerance}_sample_probability_0.25.png")
+    store_experiment = os.path.join("..", "..", "experiments", "ralph", f"Experiment_2_set_A_actor_frames_tolerance_{tolerance}"
+                                                                        f"_upsample_{upsample}.png")
     plt.savefig(store_experiment)  # save the figure to file
     plt.show()
 
-def compare_counters(file_path, ground_truth):
+def compare_counters(file_path, ground_truth, tolerance, upsample):
     """Compare two Counters and plot the comparison."""
     # Combineer de acteurs uit beide Counters
     experiment = extract_counter_from_file(file_path)
@@ -88,7 +90,8 @@ def compare_counters(file_path, ground_truth):
     plt.tight_layout()
 
     store_experiment = os.path.join("..", "..", "experiments", "ralph",
-                                    f"compare_with_ground_truth_tolerance_{tolerance}_sample_probability_0.25.png")
+                                    f"Experiment_2_compare_with_ground_truth_tolerance_{tolerance}"
+                                    f"_upsample_{upsample}.png")
     plt.savefig(store_experiment)  # save the figure to file
     plt.show()
 
@@ -107,11 +110,13 @@ def extract_counter_from_file(file_path):
 
     return actor_counter
 
-ground_truth = Counter({'Chandler': 179, 'Joey': 292, 'Monica': 639, 'Phoebe': 131, 'Rachel': 289, 'Ross': 456, 'Unknown': 689})
+ground_truth = Counter({'Chandler': 716, 'Joey': 1168, 'Monica': 2556, 'Phoebe': 524, 'Rachel': 1156, 'Ross': 1824, 'Unknown': 2756})
 # Inlezen van de resultaten uit het tekstbestand
-tolerance = '50'
-file_path = f"../exp_set_from_movie_results_tolerance_{tolerance}_internetpictures_sample_probability_0.25.txt"
+tolerance = '60'
+upsample = '2'
+file_path = (f"../exp_set_from_movie_results_tolerance_{tolerance}_upsample_{upsample}"
+             f"_internetpictures_desired_width_750.txt")
 
-compare_counters(file_path, ground_truth)
-plot_video_frames(file_path, tolerance)
-plot_actor_frequencies(file_path, tolerance)
+compare_counters(file_path, ground_truth, tolerance, upsample)
+plot_video_frames(file_path, tolerance, upsample)
+plot_actor_frequencies(file_path, tolerance, upsample)

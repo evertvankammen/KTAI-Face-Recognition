@@ -13,11 +13,11 @@ frames, sampled, found_names_list_with_frame_number, counted = face_recognizer.p
                                                                                                  desired_width=450,
                                                                                                  desired_model='hog',
                                                                                                  upsample_times=1,
-                                                                                                 sample_probability=0.25,
+                                                                                                 sample_probability=1,
                                                                                                  save_images=False)
 
 print(frames, sampled, counted)
-with open(f'exp_set_from_movie_results_tolerance_70_internetpictures_sample_probability_0.25.txt', 'w') as fp:
+with open(f'exp_set_from_movie_results_tolerance_70_upsample_1_internetpictures_desired_width_750.txt', 'w') as fp:
     fp.write('sampled: ' + str(sampled) + '\n')
     fp.write(str(counted) + '\n')
     fp.write('\n'.join('%s %s' % x for x in found_names_list_with_frame_number))
