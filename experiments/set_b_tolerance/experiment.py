@@ -98,7 +98,7 @@ def get_needed_frames():
     return set(frames)
 
 
-def plot_video_frames(file_path, tolerance):
+def plot_video_frames(file_path, text):
     """Plot frames where actors are recognized from a text file."""
     actor_frames = defaultdict(list)
 
@@ -127,11 +127,11 @@ def plot_video_frames(file_path, tolerance):
 
     plt.xlabel('Actors')
     plt.ylabel('Frame Number')
-    plt.title(f'Frames where Actors are Recognized\nTolerance: {tolerance}')
+    plt.title(f'Frames where Actors are Recognized\nTolerance: {text}')
     plt.xticks(rotation=45)
     plt.grid(True)
 
-    store_experiment = f"actor_frames_tolerance_{tolerance}_sample_probability_0.25.png"
+    store_experiment = f"actor_frames_tolerance_{text}_sample_probability_0.25.png"
     plt.savefig(store_experiment)  # save the figure to file
     plt.show()
 

@@ -3,6 +3,7 @@ from collections import Counter
 from collections import defaultdict
 import os
 
+
 def plot_actor_frequencies(file_path, tolerance, upsample):
     """Plot the frequency of recognized actors over video frames."""
     with open(file_path, 'r') as fp:
@@ -25,48 +26,72 @@ def plot_actor_frequencies(file_path, tolerance, upsample):
     plt.xticks(rotation=45)
     plt.ylim([0, max(frequencies) * 1.1])  # Set y-axis limit slightly above the maximum frequency
 
-    store_experiment = os.path.join("..", "..", "experiments", "ralph", f"Experiment_2_set_A_frequency_tolerance_{tolerance}"
-                                                                        f"_upsample_{upsample}.png")
+    store_experiment = os.path.join("..", "..", "experiments", "ralph",
+                                    f"Experiment_2_set_A_frequency_tolerance_{tolerance}"
+                                    f"_upsample_{upsample}.png")
     plt.savefig(store_experiment)  # save the figure to file
 
     plt.show()
+
+
+def get_needed_frames():
+    frames = []
+    file_path_temp = os.path.join("..", "..", "experiments", "set_a_tolerance", "exp_results_manual.txt")
+    with open(file_path_temp, 'r') as fp:
+        lines = fp.readlines()
+        for line in lines[4:]:
+            actor, frame = line.split()
+            frames.append(int(frame))
+    return set(frames)
+
 
 def plot_video_frames(file_path, tolerance, upsample):
     """Plot frames where actors are recognized from a text file."""
     actor_frames = defaultdict(list)
 
+    frms = get_needed_frames()
+
     with open(file_path, 'r') as fp:
         lines = fp.readlines()
         for line in lines[2:]:
             actor, frame = line.split()
-            actor_frames[actor].append(int(frame))
+            if int(frame) in frms:
+                actor_frames[actor].append(int(frame))
+
+    s = sorted(actor_frames.items())
 
     # Voeg "Unknown" toe als sleutel in het geval het niet in de dataset voorkomt
     if "Unknown" not in actor_frames:
         actor_frames["Unknown"] = []
 
     plt.figure(figsize=(10, 6))
-    colors = ['red', 'blue', 'green', 'orange', 'purple', 'brown', 'gray']
+    colors = ['blue', 'green', 'red', 'purple', 'orange', 'brown', 'gray']
 
-    for i, (actor, frames) in enumerate(actor_frames.items()):
+    for i, (actor, frames) in enumerate(s):
         # Plot elk punt met een specifieke kleur
         plt.plot([actor] * len(frames), frames, marker='o', linestyle='None', label=actor,
                  color=colors[i % len(colors)])
 
-
     plt.xlabel('Actors')
     plt.ylabel('Frame Number')
-    plt.title('Frames where Actors are Recognized\nTolerance: ' + tolerance)
+    plt.title(f'Frames where Actors are Recognized\nTolerance: {tolerance}')
     plt.legend()
     plt.xticks(rotation=45)
     plt.grid(True)
 
-    store_experiment = os.path.join("..", "..", "experiments", "ralph", f"Experiment_2_set_A_actor_frames_tolerance_{tolerance}"
-                                                                        f"_upsample_{upsample}.png")
+    store_experiment = os.path.join("..", "..", "experiments", "ralph",
+                                    f"Experiment_1_set_A_actor_frames_tolerance_{tolerance}"
+                                    f"_upsample_{upsample}.png")
     plt.savefig(store_experiment)  # save the figure to file
     plt.show()
 
-def compare_counters(file_path, ground_truth, tolerance, upsample):
+
+def addlabels(x, y, offset=0.3):
+    for i in range(len(x)):
+        plt.text(i + offset, y[i], round(y[i]))
+
+
+def compare_counters(file_path, ground_truth, tolerance, upsample, extra_text):
     """Compare two Counters and plot the comparison."""
     # Combineer de acteurs uit beide Counters
     experiment = extract_counter_from_file(file_path)
@@ -79,21 +104,26 @@ def compare_counters(file_path, ground_truth, tolerance, upsample):
     # Plot de vergelijking
     plt.figure(figsize=(10, 6))
     x = range(len(actors))
-    plt.bar(x, frames_counter1, width=0.4, label='Extracted Counter', color='blue')
-    plt.bar([i + 0.4 for i in x], frames_counter2, width=0.4, label='Ground Truth Counter', color='orange')
+    plt.bar(x, frames_counter1, width=0.4, label='Extracted Counter', color='blue', zorder=3)
+    addlabels(x, frames_counter1, -0.15)
+    x2 = [i + 0.4 for i in x]
+    plt.bar(x2, frames_counter2, width=0.4, label='Ground Truth Counter', color='orange', zorder=3)
+    addlabels(x2, frames_counter2, +0.25)
     plt.xlabel('Actors')
     plt.ylabel('Number of Frames')
-    plt.title('Comparison of Extracted Counter vs Ground Truth Counter')
+    plt.title(f'Comparison of Extracted Counter {extra_text} vs Ground Truth Counter')
     plt.xticks([i + 0.2 for i in x], actors)
     plt.legend()
-    plt.grid(axis='y')
+    plt.grid(axis='y', zorder=0)
     plt.tight_layout()
+    plt.ylim([0, 5500])
 
     store_experiment = os.path.join("..", "..", "experiments", "ralph",
-                                    f"Experiment_2_compare_with_ground_truth_tolerance_{tolerance}"
+                                    f"Experiment_2_set_A_compare_with_ground_truth_tolerance_{tolerance}"
                                     f"_upsample_{upsample}.png")
     plt.savefig(store_experiment)  # save the figure to file
     plt.show()
+
 
 def extract_counter_from_file(file_path):
     """Extract the Counter from a text file."""
@@ -110,13 +140,22 @@ def extract_counter_from_file(file_path):
 
     return actor_counter
 
-ground_truth = Counter({'Chandler': 716, 'Joey': 1168, 'Monica': 2556, 'Phoebe': 524, 'Rachel': 1156, 'Ross': 1824, 'Unknown': 2756})
-# Inlezen van de resultaten uit het tekstbestand
-tolerance = '60'
-upsample = '2'
-file_path = (f"../exp_set_from_movie_results_tolerance_{tolerance}_upsample_{upsample}"
-             f"_internetpictures_desired_width_750.txt")
 
-compare_counters(file_path, ground_truth, tolerance, upsample)
-plot_video_frames(file_path, tolerance, upsample)
-plot_actor_frequencies(file_path, tolerance, upsample)
+ground_truth = Counter(
+    {'Chandler': 1324, 'Joey': 1168, 'Monica': 2556, 'Phoebe': 524, 'Rachel': 1156, 'Ross': 1824, 'Unknown': 2748})
+# Inlezen van de resultaten uit het tekstbestand
+tolerance = '70'
+upsample = '1'
+
+file_path_exp1 = os.path.join("..", "..", "experiments", "set_a_tolerance",
+                         f"exp_set_from_movie_results_tolerance_{tolerance}_upsample_0_internetpictures_desired_width_750.txt")
+
+file_path_exp2 = os.path.join("..", "..", "experiments", "set_a_upsampling",
+                         f"exp_set_from_movie_results_tolerance_{tolerance}_upsample_1_internetpictures_desired_width_750.txt")
+
+compare_counters(file_path_exp2, ground_truth, tolerance, upsample, f"0.{tolerance} tolerance")
+
+
+
+# plot_video_frames(file_path_exp2, "0.7 same as ground truth", upsample)
+# plot_actor_frequencies(file_path, tolerance, upsample)

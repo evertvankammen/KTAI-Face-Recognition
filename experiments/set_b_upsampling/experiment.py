@@ -100,6 +100,7 @@ if __name__ == '__main__':
     # experiment(nr_of_processes=32, up_sampling_factor=0, model='hog')
     # experiment(nr_of_processes=32, up_sampling_factor=1, model='hog')
     # experiment(nr_of_processes=16, up_sampling_factor=2, model='hog')
+    experiment(nr_of_processes=10, up_sampling_factor=5, model='hog')
 
     # experiment(nr_of_processes=32, up_sampling_factor=0, model='cnn')
     # experiment(nr_of_processes=32, up_sampling_factor=1, model='cnn')
@@ -109,8 +110,8 @@ if __name__ == '__main__':
     # plot_actor_frequencies("exp_results_t_0.6_m_hog_u_1.txt", 1)
     #plot_actor_frequencies("exp_results_t_0.6_m_hog_u_2.txt", 2)
 
-    compare_counters("exp_results_t_0.6_m_hog_u_0.txt", "exp_results_manual.txt", "0.6 tolerance no-up-sample")
-    compare_counters("exp_results_t_0.6_m_hog_u_1.txt", "exp_results_manual.txt", "0.6 tolerance up-sample = 1")
-    compare_counters("exp_results_t_0.6_m_hog_u_2.txt", "exp_results_manual.txt", "0.6 tolerance up-sample = 2")
+    # compare_counters("exp_results_t_0.6_m_hog_u_0.txt", "exp_results_manual.txt", "0.6 tolerance no-up-sample")
+    # compare_counters("exp_results_t_0.6_m_hog_u_1.txt", "exp_results_manual.txt", "0.6 tolerance up-sample = 1")
+    # compare_counters("exp_results_t_0.6_m_hog_u_2.txt", "exp_results_manual.txt", "0.6 tolerance up-sample = 2")
 
 
