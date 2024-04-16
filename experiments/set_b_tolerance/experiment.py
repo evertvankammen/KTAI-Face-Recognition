@@ -41,15 +41,30 @@ def plot_actor_frequencies(file_path, tolerance, multiplier=1.0):
     plt.show()
 
 
+def get_needed_frames():
+    frames = []
+    with open("exp_results_manual.txt", 'r') as fp:
+        lines = fp.readlines()
+        for line in lines[4:]:
+            actor, frame = line.split()
+            frames.append(int(frame))
+    return set(frames)
+
+
 def plot_video_frames(file_path, tolerance):
     """Plot frames where actors are recognized from a text file."""
     actor_frames = defaultdict(list)
+
+    frms = get_needed_frames()
 
     with open(file_path, 'r') as fp:
         lines = fp.readlines()
         for line in lines[4:]:
             actor, frame = line.split()
-            actor_frames[actor].append(int(frame))
+            if int(frame) in frms:
+                actor_frames[actor].append(int(frame))
+
+
 
     s = sorted(actor_frames.items())
 
@@ -68,7 +83,6 @@ def plot_video_frames(file_path, tolerance):
     plt.xlabel('Actors')
     plt.ylabel('Frame Number')
     plt.title(f'Frames where Actors are Recognized\nTolerance: {tolerance}')
-    plt.legend()
     plt.xticks(rotation=45)
     plt.grid(True)
 
@@ -96,7 +110,7 @@ if __name__ == '__main__':
     # plot_actor_frequencies("exp_results_t_0.5_m_cnn_u_1.txt",0.6)
     # plot_actor_frequencies("exp_results_t_0.6_m_cnn_u_1.txt",0.7)
 
-    # plot_actor_frequencies("exp_results_manual.txt", "gt", multiplier=4.059)
-    plot_video_frames("exp_results_t_0.6_m_hog_u_1.txt", "0.6 100% sample")
-    plot_video_frames("exp_results_manual.txt", "ground truth 25% sample")
+    # plot_actor_frequencies("exp_results_manual.txt", "estimated ground truth", multiplier=4.059)
+    plot_video_frames("exp_results_t_0.6_m_hog_u_1.txt", "0.6 same as ground truth")
+    # plot_video_frames("exp_results_manual.txt", "ground truth 25% sample")
 
