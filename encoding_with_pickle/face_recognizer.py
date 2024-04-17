@@ -7,6 +7,7 @@ from collections import Counter
 import cv2
 import face_recognition
 
+from encoding_with_pickle.take_box_picture import save_partial_image
 from encoding_with_pickle.video_processor import VideoLoader
 
 
@@ -196,8 +197,8 @@ class FaceRecognizer:
                 if save_images:
                     filename = os.path.join(experiment_directory, f"frame_{frame_count}.jpg")
                     print(f"saving image to {filename}")
-                    cv2.imwrite(filename, frame)
-                    # save_partial_image(frame, (top, right, bottom, left), name, experiment_directory, frame_count)
+                    # cv2.imwrite(filename, frame)
+                    save_partial_image(frame, (top, right, bottom, left), name, experiment_directory, frame_count)
 
                 if self.writer is None and self.output_path is not None:
                     fourcc = cv2.VideoWriter_fourcc(*"MJPG")
