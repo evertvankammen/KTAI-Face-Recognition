@@ -7,8 +7,8 @@ from collections import Counter
 import cv2
 import face_recognition
 
-from encoding_with_pickle.take_box_picture import save_partial_image
-from encoding_with_pickle.video_processor import VideoLoader
+from take_box_picture import save_partial_image
+from video_processor import VideoLoader
 
 
 class FaceRecognizer:
