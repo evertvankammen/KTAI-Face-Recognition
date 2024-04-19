@@ -36,22 +36,23 @@ def analyse_film(process_nr, desired_tolerance, up_sampling_factor, nr_of_proces
     print("Process {} finished".format(process_nr))
 
 
-def addlabels(x, y, offset=0.3):
+def add_labels(x, y, offset=0.3):
     for i in range(len(x)):
         plt.text(i + offset, y[i], round(y[i]))
 
 
-def extract_counter_from_file(file_path):
+def extract_counter_from_file(file_path, start_point_file=4):
     """Extract the Counter from a text file."""
     # Initialiseer een lege Counter
     actors = []
     with open(file_path, 'r') as fp:
         lines = fp.readlines()
-        for line in lines[4:]:
+        for line in lines[start_point_file:]:
             actor, frame = line.split()
             actors.append(actor)
 
     return Counter(actors)
+
 
 def plot_actor_frequencies(file_path, tolerance, multiplier=1.0):
     """Plot the frequency of recognized actors over video frames."""
@@ -69,7 +70,7 @@ def plot_actor_frequencies(file_path, tolerance, multiplier=1.0):
     colors = ['blue', 'green', 'red', 'purple', 'orange', 'brown', 'gray']
     plt.subplots(layout='constrained')
     plt.bar(actors, frequencies, color=colors)
-    addlabels(actors, frequencies)
+    add_labels(actors, frequencies)
     plt.xlabel('Actors')
     plt.ylabel('Frequency')
     plt.title(f'Frequency of Recognized Actors Over Video Frames\ntaken from Friends tolerance: {tolerance}')
@@ -81,7 +82,7 @@ def plot_actor_frequencies(file_path, tolerance, multiplier=1.0):
     plt.show()
 
 
-def compare_counters(file_path, ground_truth_path, text, experiment_nr=1):
+def compare_counters(file_path, ground_truth_path, text, experiment_nr=1, start_point_file=4):
     """Compare two Counters and plot the comparison."""
     # Combineer de acteurs uit beide Counters
     experiment = extract_counter_from_file(file_path)
@@ -97,10 +98,10 @@ def compare_counters(file_path, ground_truth_path, text, experiment_nr=1):
     plt.figure(figsize=(10, 6))
     x = range(len(actors))
     plt.bar(x, frames_counter1, width=0.4, label='Extracted Counter', color='blue', zorder=3)
-    addlabels(x, frames_counter1, -0.15)
+    add_labels(x, frames_counter1, -0.15)
     x2 = [i + 0.4 for i in x]
     plt.bar(x2, frames_counter2, width=0.4, label='Ground Truth Counter', color='orange', zorder=3)
-    addlabels(x2, frames_counter2, +0.25)
+    add_labels(x2, frames_counter2, +0.25)
     plt.xlabel('Actors')
     plt.ylabel('Number of Frames')
     plt.ylim([0, 5500])
@@ -115,11 +116,11 @@ def compare_counters(file_path, ground_truth_path, text, experiment_nr=1):
     plt.show()
 
 
-def get_needed_frames():
+def get_needed_frames(start_point_file=4):
     frames = []
     with open("exp_results_manual.txt", 'r') as fp:
         lines = fp.readlines()
-        for line in lines[4:]:
+        for line in lines[start_point_file:]:
             actor, frame = line.split()
             frames.append(int(frame))
     return set(frames)
@@ -161,16 +162,6 @@ def experiment(nr_of_processes=1, desired_tolerance=0.60, up_sampling_factor=1, 
         fp.write('frames: ' + str(frames) + '\n')
         fp.write(str(counted) + '\n')
         fp.write('\n'.join('%s %s' % x for x in found_names_list_with_frame_number))
-
-
-def get_needed_frames():
-    frames = []
-    with open("exp_results_manual.txt", 'r') as fp:
-        lines = fp.readlines()
-        for line in lines[4:]:
-            actor, frame = line.split()
-            frames.append(int(frame))
-    return set(frames)
 
 
 def plot_video_frames(file_path, text, experiment_nr=1):
