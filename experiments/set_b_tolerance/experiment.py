@@ -139,9 +139,9 @@ def plot_video_frames(file_path, text):
 if __name__ == '__main__':
     # create_bars()
     # create_encodings()
-    # experiment(nr_of_processes=32, desired_tolerance=0.50, model='hog')
-    # experiment(nr_of_processes=32, desired_tolerance=0.60, model='hog')
-    # experiment(nr_of_processes=32, desired_tolerance=0.70, model='hog')
+    # experiment(nr_of_processes=20, up_sampling_factor=0, desired_tolerance=0.50, model='hog')
+    # experiment(nr_of_processes=20, up_sampling_factor=0, desired_tolerance=0.60, model='hog')
+    # experiment(nr_of_processes=20, up_sampling_factor=0, desired_tolerance=0.70, model='hog')
 
     # experiment(nr_of_processes=32, desired_tolerance=0.50, model='cnn')
     # experiment(nr_of_processes=32, desired_tolerance=0.60, model='cnn')
@@ -156,12 +156,12 @@ if __name__ == '__main__':
     # plot_actor_frequencies("exp_results_t_0.6_m_cnn_u_1.txt",0.7)
 
     # plot_actor_frequencies("exp_results_manual.txt", "estimated ground truth", multiplier=4)
-    plot_video_frames("exp_results_t_0.5_m_hog_u_1.txt", "0.5 same as ground truth")
-    plot_video_frames("exp_results_t_0.6_m_hog_u_1.txt", "0.6 same as ground truth")
-    plot_video_frames("exp_results_t_0.7_m_hog_u_1.txt", "0.7 same as ground truth")
+    # plot_video_frames("exp_results_t_0.5_m_hog_u_1.txt", "0.5 same as ground truth")
+    # plot_video_frames("exp_results_t_0.6_m_hog_u_1.txt", "0.6 same as ground truth")
+    # plot_video_frames("exp_results_t_0.7_m_hog_u_1.txt", "0.7 same as ground truth")
 
     # plot_video_frames("exp_results_manual.txt", "ground truth 25% sample")
 
-    # compare_counters("exp_results_t_0.5_m_hog_u_1.txt", "exp_results_manual.txt", "0.5 tolerance")
-    # compare_counters("exp_results_t_0.6_m_hog_u_1.txt", "exp_results_manual.txt", "0.6 tolerance")
-    # compare_counters("exp_results_t_0.7_m_hog_u_1.txt", "exp_results_manual.txt", "0.7 tolerance")
+    compare_counters("exp_results_t_0.5_m_hog_u_0.txt", "exp_results_manual.txt", "0.5 tolerance, no up sample")
+    compare_counters("exp_results_t_0.6_m_hog_u_0.txt", "exp_results_manual.txt", "0.6 tolerance, no up sample")
+    compare_counters("exp_results_t_0.7_m_hog_u_0.txt", "exp_results_manual.txt", "0.7 tolerance, no up sample")
