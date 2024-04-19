@@ -20,9 +20,9 @@ def create_encodings():
     image_encoder.save_encodings(pickle_output_path)
 
 
-def analyse_film(process_nr, desired_tolerance, up_sampling_factor, nr_of_processes, output_queue, model):
+def analyse_film(process_nr, desired_tolerance, up_sampling_factor, nr_of_processes, output_queue, model,
+                 encodings_file="embeddings_set.pickle"):
     video_file = os.path.join("..", "..", "data", "pictures", "Friends.mp4")
-    encodings_file = os.path.join("embeddings_set.pickle")
     face_recognizer = FaceRecognizer(video_file, encodings_file, output_path=None,
                                      show_display=False, process_nr=process_nr, total_processes=nr_of_processes)
 
@@ -111,7 +111,7 @@ def compare_counters(file_path, ground_truth_path, text, experiment_nr=1, start_
     plt.grid(axis='y', zorder=0)
     plt.tight_layout()
 
-    store_experiment = f"Experiment_{experiment_nr}_set_B_frequency_tolerance_{text}.png"
+    store_experiment = f"Experiment_set_A_{experiment_nr}_set_B_frequency_tolerance_{text}.png"
     plt.savefig(store_experiment)  # save the figure to file
     plt.show()
 
@@ -126,7 +126,8 @@ def get_needed_frames(start_point_file=4):
     return set(frames)
 
 
-def experiment(nr_of_processes=1, desired_tolerance=0.60, up_sampling_factor=1, model='hog'):
+def experiment(nr_of_processes=1, desired_tolerance=0.60, up_sampling_factor=1, model='hog',
+               encodings_file="embeddings_set.pickle"):
     if mp.get_start_method() != 'spawn':
         mp.set_start_method('spawn')
     start = time.time()
@@ -140,7 +141,8 @@ def experiment(nr_of_processes=1, desired_tolerance=0.60, up_sampling_factor=1, 
 
     for i in range(1, nr_of_processes + 1):
         p = mp.Process(target=analyse_film,
-                       args=(i, desired_tolerance, up_sampling_factor, nr_of_processes, output_queue, model))
+                       args=(i, desired_tolerance, up_sampling_factor, nr_of_processes, output_queue, model
+                             , encodings_file))
         jobs.append(p)
         p.start()
 
@@ -156,7 +158,7 @@ def experiment(nr_of_processes=1, desired_tolerance=0.60, up_sampling_factor=1, 
         p.join()
     end = time.time()
     duration = end - start
-    with open(f'exp_results_t_{desired_tolerance}_m_{model}_u_{up_sampling_factor}.txt', 'w') as fp:
+    with open(f'exp_results_A_t_{desired_tolerance}_m_{model}_u_{up_sampling_factor}.txt', 'w') as fp:
         fp.write('duration: ' + str(duration) + ' seconds\n')
         fp.write('sampled: ' + str(sampled) + '\n')
         fp.write('frames: ' + str(frames) + '\n')
@@ -197,6 +199,6 @@ def plot_video_frames(file_path, text, experiment_nr=1):
     plt.xticks(rotation=45)
     plt.grid(True)
 
-    store_experiment = f"Experiment_{experiment_nr}_set_B_actor_frames_tolerance_{text}.png"
+    store_experiment = f"Experiment_setA_{experiment_nr}_set_B_actor_frames_tolerance_{text}.png"
     plt.savefig(store_experiment)  # save the figure to file
     plt.show()
