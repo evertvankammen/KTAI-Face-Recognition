@@ -305,7 +305,6 @@ def plot_video_frames(file_path, ground_truth_file, text, experiment_nr=1):
 
     s = sorted(actor_frames.items())
 
-    # Voeg "Unknown" toe als sleutel in het geval het niet in de dataset voorkomt
     if "Unknown" not in actor_frames:
         actor_frames["Unknown"] = []
 
@@ -313,7 +312,6 @@ def plot_video_frames(file_path, ground_truth_file, text, experiment_nr=1):
     colors = ['blue', 'green', 'red', 'purple', 'orange', 'brown', 'gray']
 
     for i, (actor, frames) in enumerate(s):
-        # Plot elk punt met een specifieke kleur
         plt.plot([actor] * len(frames), frames, marker='o', linestyle='None', label=actor,
                  color=colors[i % len(colors)])
 

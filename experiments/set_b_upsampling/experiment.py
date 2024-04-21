@@ -4,13 +4,6 @@ from experiments.shared.shared import experiment, plot_video_frames, compare_cou
 
 
 def make_encodings():
-    """
-    Creates encodings for a given dataset.
-
-    :raises: None
-
-    :return: None
-    """
     create_encodings(os.path.join("..", "..", "data", "b_set_from_friends"),
                      pickle_output_path=os.path.join("embeddings_set.pickle"))
 

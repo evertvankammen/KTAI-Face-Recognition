@@ -10,10 +10,34 @@ from using_mediapipe.video.picture_analyser import PictureAnalyser, get_relative
 
 
 def distance_normalized_keypoint(keypoint1: NormalizedKeypoint, keypoint2: NormalizedKeypoint):
+    """
+
+    Calculates the Euclidean distance between two normalized keypoints.
+
+    Parameters:
+        keypoint1 (NormalizedKeypoint): The first normalized keypoint.
+        keypoint2 (NormalizedKeypoint): The second normalized keypoint.
+
+    Returns:
+        float: The Euclidean distance between the two keypoints.
+
+    """
     return math.sqrt((keypoint1.x - keypoint2.x) ** 2 + (keypoint1.y - keypoint2.y) ** 2)
 
 
 def euclidean_distance(a, b):
+    """
+    Calculates the Euclidean distance between two vectors.
+
+    :param a: First vector.
+    :type a: list or tuple
+
+    :param b: Second vector.
+    :type b: list or tuple
+
+    :return: The Euclidean distance between vectors a and b.
+    :rtype: float
+    """
     distance_temp = 0.0
     for i in range(len(a)):
         distance_temp += distance_normalized_keypoint(a[i], b[i])
@@ -21,6 +45,64 @@ def euclidean_distance(a, b):
 
 
 class SimpleFacerec:
+    """
+    ## SimpleFacerec
+
+    This class represents a simple face recognition system.
+
+    ### Properties
+
+    - **known_encodings**: list of tuples - A list of known face encodings.
+    - **picture_analyser**: PictureAnalyser - An object of the PictureAnalyser class responsible for analyzing input images.
+    - **embeddings_file_name**: str - The name of the embeddings file.
+
+    ### Methods
+
+    - **__init__(embeddings_file_name, min_detection_confidence, model)**: Initializes a new instance of the SimpleFacerec class.
+      - Parameters:
+        - **embeddings_file_name** (str) - The name of the embeddings file.
+        - **min_detection_confidence** (float) - The minimum confidence value for face detection.
+        - **model** - The face detection model to be used.
+
+    - **get_image_encodings(path, name)**: Returns the relative xy coordinates of a detected face in an input image.
+      - Parameters:
+        - **path** (str) - The path to the image file.
+        - **name** (str) - The name of the image file.
+      - Returns:
+        - The relative xy coordinates of a detected face.
+
+    - **save_encodings_images(path)**: Saves the face encodings and associated images to the embeddings file.
+      - Parameters:
+        - **path** (str) - The path of the directory containing the images.
+      - Returns:
+        - None
+      - Raises:
+        - UserWarning: If the embeddings file already exists.
+
+    - **write_encoded_images(person_name, enc, frame_number, filename)**: Writes the face encodings to the embeddings file.
+      - Parameters:
+        - **person_name** (str) - The name of the person in the image.
+        - **enc** - The face encodings.
+        - **frame_number** (str) - The frame number of the image.
+        - **filename** (str) - The name of the image file.
+      - Returns:
+        - None
+
+    - **read_encoded_images()**: Reads the face encodings from the embeddings file.
+      - Returns:
+        - None
+      - Raises:
+        - UserWarning: If the embeddings file is not found or is empty.
+
+    - **face_k_lowest_distances(key_points, k, frame=None)**: Performs face recognition and returns the k most similar faces based on the Euclidean distance.
+      - Parameters:
+        - **key_points** - The face encodings to be compared with the known encodings.
+        - **k** (int) - The number of closest matches to be returned.
+        - **frame** - The frame number for filtering results (optional).
+      - Returns:
+        - The name of the most similar face, or "No faces found" if there are no matches.
+
+    """
     known_encodings = []
     picture_analyser = None
     embeddings_file_name = None

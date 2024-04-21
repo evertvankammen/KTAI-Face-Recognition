@@ -3,20 +3,25 @@ import os
 import random
 
 import cv2
-from typing_extensions import deprecated
-
-from using_mediapipe.video.face_detector import SimpleFacerec
 from using_mediapipe.video.picture_analyser import PictureAnalyser, get_box
-
-IMAGE_PATH = os.path.join("..", "..", "data", "pictures")
-
-IMAGE_PATH_EMBEDDINGS = os.path.join("..", "..", "encoding_with_pickle", "dataset")
-
-MIN_DETECTION_CONFIDENCE = 0.75
-SAVE_EMBEDDING_RATE = 10
 
 
 def save_image(frame, embeddings, frame_duration_counter, image_save_path):
+    """
+    Save Image.
+
+    Save an image with bounding box from a given frame and its corresponding embeddings.
+
+    Parameters:
+    - frame (numpy.ndarray): The frame from which the image will be saved.
+    - embeddings (List[numpy.ndarray]): The list of embeddings for each detected face in the frame.
+    - frame_duration_counter (int): The duration of the frame.
+    - image_save_path (str): The path where the saved image will be stored.
+
+    Returns:
+    None.
+
+    """
     for nr in range(len(embeddings)):
         emb = embeddings[nr]
         image_rows, image_cols, _ = emb.shape
@@ -39,6 +44,20 @@ def save_image(frame, embeddings, frame_duration_counter, image_save_path):
 
 
 def take_pictures(video_file_name, min_detection_confidence, model, sample_chance: int, image_save_path):
+    """
+
+    Parameters:
+    - video_file_name (str): The name of the video file to be processed.
+    - min_detection_confidence (float): The minimum detection confidence required for an object to be considered detected.
+    - model (Model): The object detection model to be used for object detection.
+    - sample_chance (int): The chance (in percentage) of sampling each frame for analysis.
+    - image_save_path (str): The path where the analyzed images will be saved.
+
+    Returns:
+    - frame_counter (int): The total number of frames in the video file.
+    - frames_sampled (int): The number of frames that were sampled for analysis.
+    - fps (float): The frames per second of the video file.
+    """
     picture_analyser = PictureAnalyser(min_detection_confidence=min_detection_confidence, model=model)
     video_file = video_file_name
     cap = cv2.VideoCapture(video_file)
@@ -63,3 +82,4 @@ def take_pictures(video_file_name, min_detection_confidence, model, sample_chanc
             break
 
     return frame_counter, frames_sampled, fps
+
