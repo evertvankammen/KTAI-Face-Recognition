@@ -5,7 +5,6 @@ from pathlib import Path
 
 import cv2
 from mediapipe.tasks.python.components.containers.keypoint import NormalizedKeypoint
-from typing_extensions import deprecated
 
 from using_mediapipe.video.picture_analyser import PictureAnalyser, get_relative_to_box, XY
 
