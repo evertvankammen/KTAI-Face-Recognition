@@ -3,7 +3,7 @@
 
 Raymond Snijders   
 Evert van Kammen  
-Ralph Demondt
+Ralph Depondt
 
 Maximum Python version to use is 3.11, mediapipe won't install with version 3.12.
 
