@@ -1,4 +1,11 @@
-from experiments.shared.shared import experiment, plot_video_frames, compare_counters
+import os
+
+from experiments.shared.shared import experiment, plot_video_frames, compare_counters, create_encodings
+
+
+def make_encodings():
+    create_encodings(os.path.join("..", "..", "data", "b_set_from_friends"),
+                     pickle_output_path=os.path.join("embeddings_set.pickle"))
 
 
 def video_frames_graphs():
@@ -7,23 +14,29 @@ def video_frames_graphs():
     plot_video_frames("exp_results_t_0.6_m_hog_u_2.txt", "0.6 upsample=2 same frames as ground truth", experiment_nr=2)
 
 
-
 def compare_counters_graphs():
     compare_counters("exp_results_t_0.6_m_hog_u_0.txt", "exp_results_manual.txt", "0.6 tolerance upsample=0",
                      experiment_nr=2)
     compare_counters("exp_results_t_0.6_m_hog_u_1.txt", "exp_results_manual.txt", "0.6 tolerance upsample=1",
                      experiment_nr=2)
     compare_counters("exp_results_t_0.6_m_hog_u_2.txt", "exp_results_manual.txt", "0.6 tolerance upsample=2",
-                     experiment_nr=3)
+                     experiment_nr=2)
+
+
+def create_experiment_results():
+    experiment(nr_of_processes=32, up_sampling_factor=0, desired_tolerance=0.60, model='hog',
+               video_file=os.path.join("..", "..", "data", "pictures", "Friends.mp4"),
+               encodings_file="embeddings_set.pickle")
+    experiment(nr_of_processes=32, up_sampling_factor=1, desired_tolerance=0.60, model='hog',
+               video_file=os.path.join("..", "..", "data", "pictures", "Friends.mp4"),
+               encodings_file="embeddings_set.pickle")
+    experiment(nr_of_processes=32, up_sampling_factor=2, desired_tolerance=0.60, model='hog',
+               video_file=os.path.join("..", "..", "data", "pictures", "Friends.mp4"),
+               encodings_file="embeddings_set.pickle")
 
 
 if __name__ == '__main__':
-    plot_video_frames("exp_results_A_t_0.5_m_hog_u_2.txt", "0.5 upsample=2 same frames as ground truth", experiment_nr=2)
-    compare_counters("exp_results_A_t_0.5_m_hog_u_2.txt", "exp_results_manual.txt", "0.5 tolerance upsample=2",experiment_nr=2)
-    # video_frames_graphs()
-    # compare_counters_graphs()
-    # experiment(nr_of_processes=32, up_sampling_factor=0, model='hog')
-    # experiment(nr_of_processes=32, up_sampling_factor=1, model='hog')
-    # experiment(nr_of_processes=16, up_sampling_factor=2, model='hog')
-    # experiment(nr_of_processes=32, desired_tolerance=0.5, up_sampling_factor=2, model='hog', encodings_file='encodings_hog_set_a.pickle')
-    # experiment(nr_of_processes=32, desired_tolerance=0.6, up_sampling_factor=2, model='hog', encodings_file='encodings_hog_set_a.pickle')
+    plot_video_frames("exp_results_A_t_0.5_m_hog_u_2.txt", "0.5 upsample=2 same frames as ground truth",
+                      experiment_nr=2)
+    compare_counters("exp_results_A_t_0.5_m_hog_u_2.txt", "exp_results_manual.txt", "0.5 tolerance upsample=2",
+                     experiment_nr=2)
