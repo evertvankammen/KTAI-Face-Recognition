@@ -14,10 +14,10 @@ actor_names = known_encodings['names']
 
 
 # Pad naar de map met testafbeeldingen
-test_images_path = os.path.join("test")
+test_images_path = os.path.join("../run_tests/test")
 
 # Maak een map aan voor de gevalideerde afbeeldingen
-validate_images_path = os.path.join("validate")
+validate_images_path = os.path.join("../run_tests/validate")
 if not os.path.exists(validate_images_path):
     os.makedirs(validate_images_path)
 
@@ -28,7 +28,7 @@ for filename in os.listdir(test_images_path):
         image = cv2.imread(image_path)
         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        # Gebruik face_recognition om gezichten in de afbeelding te detecteren
+        # Gebruik using_face_recognition om gezichten in de afbeelding te detecteren
         face_locations = face_recognition.face_locations(rgb_image)
         face_encodings = face_recognition.face_encodings(rgb_image, face_locations)
 

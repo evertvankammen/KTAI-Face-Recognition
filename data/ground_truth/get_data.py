@@ -4,7 +4,7 @@ from collections import Counter
 
 def get_image_files():
     """
-            Retrieve image files from the dataset directory.
+            Retrieve image files from the experiment_a_internet_pictures directory.
 
             Returns:
                 list: List of file paths for images.

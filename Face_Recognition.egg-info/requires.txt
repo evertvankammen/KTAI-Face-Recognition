@@ -1,0 +1,6 @@
+face-recognition
+matplotlib>=3.0
+mediapipe
+numpy>=1.0
+opencv-python
+pandas

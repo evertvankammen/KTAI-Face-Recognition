@@ -5,11 +5,17 @@ import multiprocessing as mp
 
 from matplotlib import pyplot as plt
 
-from encoding_with_pickle.face_recognizer import FaceRecognizer
-from encoding_with_pickle.image_encoder import ImageEncoder
+from using_face_recognition.face_recognizer import FaceRecognizer
+from using_face_recognition.image_encoder import ImageEncoder
 
 
 def create_encodings():
+    """
+        Creates encodings for images using the Face Recognition library.
+
+        Image files are located in the specified image_path directory.
+        Encodings are saved to a pickle file specified by pickle_output_path.
+    """
     image_path = os.path.join("..", "..", "data", "b_set_from_friends")
     encode_model = 'cnn'
     number_of_images = 2
@@ -22,6 +28,21 @@ def create_encodings():
 
 def analyse_film(process_nr, desired_tolerance, up_sampling_factor, nr_of_processes, output_queue, model,
                  encodings_file="embeddings_set.pickle"):
+    """
+       Analyzes a video file for faces using the specified parameters.
+
+       Args:
+           process_nr (int): Process number.
+           desired_tolerance (float): Tolerance value for face recognition.
+           up_sampling_factor (int): Up-sampling factor for the image.
+           nr_of_processes (int): Total number of processes.
+           output_queue (multiprocessing.Queue): Queue for process output.
+           model (str): Model used for face recognition.
+           encodings_file (str): Path to the encodings file.
+
+       Returns:
+           None
+    """
     video_file = os.path.join("..", "..", "data", "pictures", "Friends.mp4")
     face_recognizer = FaceRecognizer(video_file, encodings_file, output_path=None,
                                      show_display=False, process_nr=process_nr, total_processes=nr_of_processes)
@@ -37,12 +58,32 @@ def analyse_film(process_nr, desired_tolerance, up_sampling_factor, nr_of_proces
 
 
 def add_labels(x, y, offset=0.3):
+    """
+        Add labels to a bar plot.
+
+        Args:
+            x (list): List of x-values.
+            y (list): List of y-values.
+            offset (float): Offset value for label placement.
+
+        Returns:
+            None
+    """
     for i in range(len(x)):
         plt.text(i + offset, y[i], round(y[i]))
 
 
 def extract_counter_from_file(file_path, start_point_file=4):
-    """Extract the Counter from a text file."""
+    """
+        Extracts a Counter from a text file containing actor names and frame numbers.
+
+        Args:
+            file_path (str): Path to the text file.
+            start_point_file (int): Starting point in the file to extract data.
+
+        Returns:
+            collections.Counter: Counter object containing actor names and their occurrences.
+    """
     # Initialiseer een lege Counter
     actors = []
     with open(file_path, 'r') as fp:
@@ -55,7 +96,17 @@ def extract_counter_from_file(file_path, start_point_file=4):
 
 
 def plot_actor_frequencies(file_path, tolerance, multiplier=1.0):
-    """Plot the frequency of recognized actors over video frames."""
+    """
+        Plots the frequency of recognized actors over video frames.
+
+        Args:
+            file_path (str): Path to the text file containing actor frequencies.
+            tolerance (float): Tolerance value for face recognition.
+            multiplier (float): Multiplier value for frequency calculation.
+
+        Returns:
+            None
+    """
     with open(file_path, 'r') as fp:
         lines = fp.readlines()
         sampled = int(lines[1].split(':')[1].strip())
@@ -83,7 +134,19 @@ def plot_actor_frequencies(file_path, tolerance, multiplier=1.0):
 
 
 def compare_counters(file_path, ground_truth_path, text, experiment_nr=1, start_point_file=4):
-    """Compare two Counters and plot the comparison."""
+    """
+        Compares two Counters and plots the comparison.
+
+        Args:
+            file_path (str): Path to the first text file.
+            ground_truth_path (str): Path to the second text file.
+            text (str): Additional text for the plot title.
+            experiment_nr (int): Experiment number.
+            start_point_file (int): Starting point in the file to extract data.
+
+        Returns:
+            None
+    """
     # Combineer de acteurs uit beide Counters
     experiment = extract_counter_from_file(file_path)
     ground_truth = extract_counter_from_file(ground_truth_path)
@@ -117,6 +180,15 @@ def compare_counters(file_path, ground_truth_path, text, experiment_nr=1, start_
 
 
 def get_needed_frames(start_point_file=4):
+    """
+        Retrieves the needed frames from a text file.
+
+        Args:
+            start_point_file (int): Starting point in the file to extract data.
+
+        Returns:
+            set: Set of frame numbers.
+    """
     frames = []
     with open("exp_results_manual.txt", 'r') as fp:
         lines = fp.readlines()
@@ -128,6 +200,19 @@ def get_needed_frames(start_point_file=4):
 
 def experiment(nr_of_processes=1, desired_tolerance=0.60, up_sampling_factor=1, model='hog',
                encodings_file="embeddings_set.pickle"):
+    """
+        Performs face recognition experiments using multiprocessing.
+
+        Args:
+            nr_of_processes (int): Number of processes.
+            desired_tolerance (float): Tolerance value for face recognition.
+            up_sampling_factor (int): Up-sampling factor for the image.
+            model (str): Model used for face recognition.
+            encodings_file (str): Path to the encodings file.
+
+        Returns:
+            None
+    """
     if mp.get_start_method() != 'spawn':
         mp.set_start_method('spawn')
     start = time.time()
@@ -167,7 +252,17 @@ def experiment(nr_of_processes=1, desired_tolerance=0.60, up_sampling_factor=1, 
 
 
 def plot_video_frames(file_path, text, experiment_nr=1):
-    """Plot frames where actors are recognized from a text file."""
+    """
+        Plots frames where actors are recognized from a text file.
+
+        Args:
+            file_path (str): Path to the text file containing recognized actors and frames.
+            text (str): Additional text for the plot title.
+            experiment_nr (int): Experiment number.
+
+        Returns:
+            None
+    """
     actor_frames = defaultdict(list)
 
     frms = get_needed_frames()
@@ -181,7 +276,7 @@ def plot_video_frames(file_path, text, experiment_nr=1):
 
     s = sorted(actor_frames.items())
 
-    # Voeg "Unknown" toe als sleutel in het geval het niet in de dataset voorkomt
+    # Voeg "Unknown" toe als sleutel in het geval het niet in de experiment_a_internet_pictures voorkomt
     if "Unknown" not in actor_frames:
         actor_frames["Unknown"] = []
 

@@ -7,8 +7,8 @@ from collections import Counter
 import cv2
 import face_recognition
 
-from take_box_picture import save_partial_image
-from video_processor import VideoLoader
+from using_face_recognition.take_box_picture import save_partial_image
+from using_face_recognition.video_processor import VideoLoader
 
 
 class FaceRecognizer:

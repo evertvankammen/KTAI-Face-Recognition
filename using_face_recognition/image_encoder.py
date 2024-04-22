@@ -9,16 +9,16 @@ class ImageEncoder:
         Class to encode images using face recognition and save the encodings.
 
         Args:
-            dataset_directory (str): Path to the directory containing the dataset of images.
+            dataset_directory (str): Path to the directory containing the experiment_a_internet_pictures of images.
 
         Attributes:
-            dataset_directory (str): Path to the dataset directory.
+            dataset_directory (str): Path to the experiment_a_internet_pictures directory.
             known_encodings (list): List to store face encodings.
             known_names (list): List to store corresponding names of the people.
             processed_images_per_person (dict): Dictionary to keep track of processed images for each person.
 
         Methods:
-            get_image_files: Retrieve image files from the dataset directory.
+            get_image_files: Retrieve image files from the experiment_a_internet_pictures directory.
             encode_images: Encode images using face recognition.
             save_encodings: Serialize and save the face encodings and corresponding names to a file.
     """
@@ -31,7 +31,7 @@ class ImageEncoder:
 
     def get_image_files(self):
         """
-                Retrieve image files from the dataset directory.
+                Retrieve image files from the experiment_a_internet_pictures directory.
 
                 Returns:
                     list: List of file paths for images.
@@ -54,7 +54,7 @@ class ImageEncoder:
             Returns:
                 None
         """
-        print("Extracting all images from dataset...")
+        print("Extracting all images from experiment_a_internet_pictures...")
         image_paths = self.get_image_files()
 
         for (i, image_path) in enumerate(image_paths):

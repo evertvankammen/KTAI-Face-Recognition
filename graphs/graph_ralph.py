@@ -60,7 +60,7 @@ def plot_video_frames(file_path, tolerance, upsample):
 
     s = sorted(actor_frames.items())
 
-    # Voeg "Unknown" toe als sleutel in het geval het niet in de dataset voorkomt
+    # Voeg "Unknown" toe als sleutel in het geval het niet in de experiment_a_internet_pictures voorkomt
     if "Unknown" not in actor_frames:
         actor_frames["Unknown"] = []
 

@@ -10,7 +10,7 @@ from using_mediapipe.video.picture_analyser import PictureAnalyser, get_box
 
 IMAGE_PATH = os.path.join("..", "..", "data", "pictures")
 
-IMAGE_PATH_EMBEDDINGS = os.path.join("..", "..", "encoding_with_pickle", "dataset")
+IMAGE_PATH_EMBEDDINGS = os.path.join("..", "..", "encoding_with_pickle", "experiment_a_internet_pictures")
 
 MIN_DETECTION_CONFIDENCE = 0.75
 SAVE_EMBEDDING_RATE = 10
