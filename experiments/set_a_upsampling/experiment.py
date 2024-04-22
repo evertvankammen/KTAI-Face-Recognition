@@ -2,9 +2,9 @@ from experiments.shared.shared import experiment, plot_video_frames, compare_cou
 
 
 def video_frames_graphs():
-    plot_video_frames("exp_results_t_0.6_m_hog_u_0.txt", "0.6 upsample=0 same frames as ground truth", experiment_nr=2)
-    plot_video_frames("exp_results_t_0.6_m_hog_u_1.txt", "0.6 upsample=1 same frames as ground truth", experiment_nr=2)
-    plot_video_frames("exp_results_t_0.6_m_hog_u_2.txt", "0.6 upsample=2 same frames as ground truth", experiment_nr=2)
+    plot_video_frames("exp_results_t_0.6_m_hog_u_0.txt", "exp_results_manual.txt", "0.6 upsample=0 same frames as ground truth", experiment_nr=2)
+    plot_video_frames("exp_results_t_0.6_m_hog_u_1.txt", "exp_results_manual.txt", "0.6 upsample=1 same frames as ground truth", experiment_nr=2)
+    plot_video_frames("exp_results_t_0.6_m_hog_u_2.txt", "exp_results_manual.txt", "0.6 upsample=2 same frames as ground truth", experiment_nr=2)
 
 
 

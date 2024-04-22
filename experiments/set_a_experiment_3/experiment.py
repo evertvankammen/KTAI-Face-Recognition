@@ -1,6 +1,6 @@
 import os
 
-from encoding_with_pickle.face_recognizer import FaceRecognizer
+from using_face_recognition.face_recognizer import FaceRecognizer
 
 
 def analyse_film(movie_name):

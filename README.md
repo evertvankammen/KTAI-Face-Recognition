@@ -44,7 +44,15 @@ There are for variables you should think about:
 
 After running encoder_main.py, a pickle file is created, which can be used to run the face recognition.
 
-#### Mediapipe [TODO- EVERT]
+#### Mediapipe
+MediaPipe is a package from Google Development. 
+See the pip documentation https://pypi.org/project/mediapipe/.
+In this application only the face-detection from MediaPipe is used to create the so called 'ground-truth'.
+This is a set of images taken from the Friends.mp4 with a high detection change and classified by hand.
+This gives an estimated distribution op the occurrences of actors in the target clip.
+This distribution then can be compared with distributions found in the experiments.
+File experiments/ground_truth/create_image_set.py contains the code that created the 'ground-truth' data.
+Path data/ground_truth contains this set op pictures.
 
 ### Experiments
 For each experiment, create a directory with the name of the experiment that you want to conduct.

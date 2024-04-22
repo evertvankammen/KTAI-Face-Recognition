@@ -3,11 +3,11 @@ from experiments.shared.shared import plot_video_frames, compare_counters
 
 def video_frames_graphs():
     plot_video_frames("exp_set_from_movie_results_tolerance_50_upsample_0_internetpictures_desired_width_750.txt",
-                      "TEST0.5 upsample=0 same frames as ground truth", experiment_nr=1)
+                      "exp_results_manual.txt", "TEST0.5 upsample=0 same frames as ground truth", experiment_nr=1)
     plot_video_frames("exp_set_from_movie_results_tolerance_60_upsample_0_internetpictures_desired_width_750.txt",
-                      "TEST0.6 upsample=0 same frames as ground truth", experiment_nr=1)
+                      "exp_results_manual.txt",  "TEST0.6 upsample=0 same frames as ground truth", experiment_nr=1)
     plot_video_frames("exp_set_from_movie_results_tolerance_70_upsample_0_internetpictures_desired_width_750.txt",
-                      "TEST0.7 upsample=0 same frames as ground truth", experiment_nr=1)
+                      "exp_results_manual.txt", "TEST0.7 upsample=0 same frames as ground truth", experiment_nr=1)
 
 
 def compare_counters_graphs():
